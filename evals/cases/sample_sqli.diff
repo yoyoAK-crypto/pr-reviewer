@@ -1,0 +1,16 @@
+diff --git a/app/users.py b/app/users.py
+--- a/app/users.py
++++ b/app/users.py
+@@ -1,8 +1,12 @@
+ import sqlite3
+ 
++API_KEY = "prod-7f3a9c2e8b1d4f6a0e5b9c3d2a1f8e7b"
++
+ def get_user(conn: sqlite3.Connection, username: str):
+-    cur = conn.execute("SELECT * FROM users WHERE name = ?", (username,))
++    query = f"SELECT * FROM users WHERE name = '{username}'"
++    cur = conn.execute(query)
+     return cur.fetchone()
+ 
+ def list_users(conn: sqlite3.Connection):
+     return conn.execute("SELECT name FROM users").fetchall()

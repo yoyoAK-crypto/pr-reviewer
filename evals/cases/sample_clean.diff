@@ -1,0 +1,13 @@
+diff --git a/app/greeting.py b/app/greeting.py
+--- a/app/greeting.py
++++ b/app/greeting.py
+@@ -1,7 +1,7 @@
+-def build_greeting(nme: str) -> str:
+-    msg = f"Helo, {nme}! Welcome back."
+-    return msg
++def build_greeting(name: str) -> str:
++    msg = f"Hello, {name}! Welcome back."
++    return msg
+ 
+ def build_farewell(name: str) -> str:
+     return f"Goodbye, {name}."
