@@ -1,0 +1,10 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1,5 @@
+ # pr-reviewer
+ 
+-An AI agent that reviews pull requets.
++An AI agent that reviews pull requests.
+ 
+ ## Setup

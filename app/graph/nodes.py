@@ -1,28 +1,31 @@
-import json
-import sys
+import sys, json
 from pathlib import Path
 
-from dotenv import load_dotenv
 from groq import Groq
+from dotenv import load_dotenv
 from pydantic import ValidationError
+from langgraph.types import Send
 
-from app.graph.state import Finding
+from app.graph.state import ReviewState, Finding
 
 load_dotenv()
 client = Groq()
 
-# Prompts live in app/prompts/, one file per reviewer.
+# Folder holding security.txt, style.txt and tests.txt
 PROMPTS = Path(__file__).parent.parent / "prompts"
 
-# The function takes the reviewer's name (which picks the prompt file) and the diff, both strings
-# '-> list[Finding]' States that the function should return a list of Finding objects.
-# Finding is the Pydantic class defined in state.py, so each item has reviewer, file, line, severity, message and confidence.
 
-def run_reviewer(name: str, diff: str) -> list[Finding]:
+# ---------- One reviewer call ----------
+
+# Runs one reviewer (security, style or tests) on a diff.
+# Returns the valid findings and how many tokens the call used.
+def run_reviewer(name: str, diff: str) -> tuple[list[Finding], int]:
     system = (PROMPTS / f"{name}.txt").read_text(encoding="utf-8")
+
     resp = client.chat.completions.create(
         model="openai/gpt-oss-120b",  # check console.groq.com/docs/models for current IDs
         max_completion_tokens=4000,  # reasoning tokens count toward this limit
+        temperature=0,  # same input gives (nearly) the same output, so eval scores are comparable
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": diff},
@@ -32,24 +35,73 @@ def run_reviewer(name: str, diff: str) -> list[Finding]:
 
     # gpt-oss is a reasoning model: if it uses the whole token budget thinking,
     # it stops before writing the answer and content comes back empty.
-    # finish_reason == "length" is how Groq reports that the reply hit the limit.
+    # finish_reason == "length" means it hit max_completion_tokens.
     choice = resp.choices[0]
     if choice.finish_reason == "length" or not choice.message.content:
         raise RuntimeError(f"{name} reviewer ran out of tokens before answering")
 
-    # json.loads reads a string written in JSON format and builds the matching Python objects from it.
-    # After parsing, you get a real dictionary you can index into: e.g, data["findings"] gives you... [{'file': 'app/users.py', 'line': 3, 'confidence': 1.0}]
+    # json.loads turns the JSON text into a Python dictionary.
+    # Each finding in that dictionary becomes a Finding object, which is where Pydantic checks it.
     data = json.loads(choice.message.content)
 
     # Validate each finding on its own, so one malformed finding doesn't throw away the valid ones.
-    # .get("findings", []) returns an empty list instead of crashing if the key is missing.
+    # reviewer=name is set by our code, so the model can't mislabel it.
+    # {**f, "reviewer": name} overwrites any "reviewer" key the model sent, instead of passing it twice.
     findings = []
     for f in data.get("findings", []):
         try:
-            # reviewer is filled in here from the name we passed, not trusted from the model's reply.
             findings.append(Finding(**{**f, "reviewer": name}))
-        # If one field doesn't match Pydantic validation, don't crash all findings, rather send a message to terminal that finding was skipped.
         except ValidationError as e:
-            # Printed to stderr so it shows in the terminal but stays separate from the real output.
             print(f"Skipped invalid {name} finding: {e}", file=sys.stderr)
-    return findings
+
+    return findings, resp.usage.total_tokens
+
+
+
+# Decides which reviewers to run, based on simple rules (no LLM yet).
+def planner(state: ReviewState) -> dict:
+    # Lines like "+++ b/app/auth.py" name the changed files; [6:] cuts off "+++ b/".
+    files = [line[6:] for line in state["diff"].splitlines() if line.startswith("+++ b/")]
+
+    # Docs or config only: style is the only reviewer worth running.
+    # .txt is not in the list because prompt files are .txt and change how the reviewers behave.
+    # `files and` stops an empty list from counting as docs-only, since all([]) is True.
+    docs_only = bool(files) and all(f.endswith((".md", ".json", ".yml", ".yaml", ".toml")) for f in files)
+    plan = ["style"] if docs_only else ["security", "style", "tests"]
+
+    return {"changed_files": files, "plan": plan}
+
+
+# Called by LangGraph after the planner. Returns one Send per reviewer,
+# which tells LangGraph to run the "reviewer" node once for each, in parallel.
+def fan_out(state: ReviewState) -> list[Send]:
+    return [Send("reviewer", {"name": name, "diff": state["diff"]}) for name in state["plan"]]
+
+
+# One reviewer run. Receives the small dict from Send, not the full state.
+# Returns findings and tokens; operator.add in ReviewState merges them across parallel runs.
+def reviewer(payload: dict) -> dict:
+    findings, tokens = run_reviewer(payload["name"], payload["diff"])
+    return {"findings": findings, "tokens_used": tokens}
+
+
+# Cleans up all findings into one review (plain rules, no LLM yet).
+def synthesizer(state: ReviewState) -> dict:
+    # Drop weak findings, unless they're high severity.
+    kept = [f for f in state["findings"] if f.confidence >= 0.6 or f.severity == "high"]
+
+    # Merge duplicates: same file and same line, keep the most confident.
+    # Only exact lines count, so two different bugs a few lines apart are both kept.
+    kept.sort(key=lambda f: f.confidence, reverse=True)
+    unique = []
+    for f in kept:
+        if not any(u.file == f.file and u.line == f.line for u in unique):
+            unique.append(f)
+
+    # Rank by severity, then confidence, and cap at 7 comments.
+    order = {"high": 0, "medium": 1, "low": 2}
+    unique.sort(key=lambda f: (order[f.severity], -f.confidence))
+    top = unique[:7]
+
+    lines = [f"[{f.severity}] {f.file}:{f.line} ({f.reviewer}) {f.message}" for f in top]
+    return {"final_review": "\n".join(lines) or "No issues found."}
