@@ -13,6 +13,7 @@ class Finding(BaseModel):
     severity: Literal["low", "medium", "high"]
     message: str
     confidence: float = Field(ge=0, le=1)
+                    # what the synthesizer kept, used by evals
 
 
 # Everything the LangGraph workflow reads and writes as a PR moves through it.
@@ -31,4 +32,5 @@ class ReviewState(TypedDict):
     findings: Annotated[list[Finding], operator.add]
 
     final_review: str                              # The model writes a summary from all the findings, using a synthesizer prompt
-    tokens_used: Annotated[int, operator.add]      # summed across all nodes, for cost tracking
+    tokens_used: Annotated[int, operator.add] 
+    final_findings: list[Finding]                  # what the synthesizer kept, used by evals     # summed across all nodes, for cost tracking

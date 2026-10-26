@@ -9,10 +9,36 @@ from langgraph.types import Send
 from app.graph.state import ReviewState, Finding
 
 load_dotenv()
-client = Groq()
+client = Groq(max_retries=6)  # waits and retries on 429 instead of failing
 
 # Folder holding security.txt, style.txt and tests.txt
 PROMPTS = Path(__file__).parent.parent / "prompts"
+
+# The exact JSON shape every reviewer must return.
+# With strict mode, the model is forced to include every key with the right type,
+# so "Field required" errors from missing keys should disappear.
+FINDINGS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "findings": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string"},
+                    "line": {"type": "integer"},
+                    "severity": {"type": "string", "enum": ["low", "medium", "high"]},
+                    "message": {"type": "string"},
+                    "confidence": {"type": "number"},
+                },
+                "required": ["file", "line", "severity", "message", "confidence"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["findings"],
+    "additionalProperties": False,
+}
 
 
 # ---------- One reviewer call ----------
@@ -104,4 +130,4 @@ def synthesizer(state: ReviewState) -> dict:
     top = unique[:7]
 
     lines = [f"[{f.severity}] {f.file}:{f.line} ({f.reviewer}) {f.message}" for f in top]
-    return {"final_review": "\n".join(lines) or "No issues found."}
+    return {"final_review": "\n".join(lines) or "No issues found.", "final_findings": top}
