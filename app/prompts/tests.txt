@@ -18,5 +18,8 @@ Report at most one finding per function, naming the most important untested case
 Point the finding at the added line that contains the untested logic, not at a test file or a constant.
 You only see the diff, not the whole repository. If the diff touches no test files, tests may exist elsewhere, so keep confidence at 0.7 or below.
 Use severity "high" for untested error handling or logic involving money, authentication, or data deletion, "medium" for untested branches or return values, and "low" for minor edge cases in new logic.
+If the diff adds tests that cover the new logic, do not ask for more (integration tests, logging, ordering).
+Use "medium" or "high" only when untested logic could produce wrong results; anything else is "low".
 Return a JSON object {"findings": [...]} where each finding has keys: file, line, severity, message, confidence (0 to 1).
 Return {"findings": []} if there are no real gaps. An empty list is the correct answer for most small diffs. Never claim a gap you cannot point to in the diff.
+Each diff line starts with its line number in the new file. Use that number for "line"; removed lines (no number) should be reported at the nearest numbered line.

@@ -1,0 +1,31 @@
+--- a/app/services/billing.py
++++ b/app/services/billing.py
+@@ -28,10 +28,14 @@
+     return 0.0
+ 
+ 
++def _apply_tax(amount: float) -> float:
++    return amount * (1 + TAX_RATE)
++
++
+ def total(invoice: Invoice) -> float:
+     amount = subtotal(invoice)
+     amount -= discount(amount)
+-    return round(amount * (1 + TAX_RATE), 2)
++    return round(_apply_tax(amount), 2)
+ 
+ 
+ def installments(invoice: Invoice, months: int) -> list[float]:
+--- /dev/null
++++ b/tests/test_billing.py
+@@ -0,0 +1,10 @@
++from app.services.billing import Invoice, LineItem, _apply_tax, total
++
++
++def test_apply_tax():
++    assert _apply_tax(100) == 114.0
++
++
++def test_total_applies_discount_then_tax():
++    invoice = Invoice(customer_id=1, items=[LineItem("A", 50.0, 2)])
++    assert total(invoice) == 102.6

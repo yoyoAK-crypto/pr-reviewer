@@ -1,0 +1,261 @@
+{
+  "note": "v0 baseline",
+  "metrics": {
+    "raw": {
+      "recall_%": 100.0,
+      "precision_%": 100.0,
+      "findings_per_clean_case": 0.0
+    },
+    "final": {
+      "recall_%": 100.0,
+      "precision_%": 100.0,
+      "findings_per_clean_case": 0.0
+    },
+    "clean_pass_rate_%": 100.0,
+    "total_tokens": 12710,
+    "avg_seconds_per_pr": 3.1,
+    "errors": 3
+  },
+  "cases": [
+    {
+      "case": "bug_01_sqli.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.0,
+      "tokens": 2124,
+      "raw": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/auth.py",
+            "line": 10,
+            "severity": "high",
+            "message": "Direct string interpolation of 'username' into SQL query enables SQL injection; use parameterized queries instead.",
+            "confidence": 1.0
+          }
+        ]
+      },
+      "final": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/auth.py",
+            "line": 10,
+            "severity": "high",
+            "message": "Direct string interpolation of 'username' into SQL query enables SQL injection; use parameterized queries instead.",
+            "confidence": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "case": "bug_02_secret.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.4,
+      "tokens": 2136,
+      "raw": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/payments.py",
+            "line": 5,
+            "severity": "high",
+            "message": "Hardcoded Stripe secret key is embedded in source code, exposing credentials and allowing unauthorized access to the Stripe account. Use environment variables or a secure secret manager instead.",
+            "confidence": 1.0
+          },
+          {
+            "reviewer": "tests",
+            "file": "app/payments.py",
+            "line": 5,
+            "severity": "high",
+            "message": "Hardcoded Stripe API key replaces environment variable, changing authentication behavior and is not covered by tests",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "final": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/payments.py",
+            "line": 5,
+            "severity": "high",
+            "message": "Hardcoded Stripe secret key is embedded in source code, exposing credentials and allowing unauthorized access to the Stripe account. Use environment variables or a secure secret manager instead.",
+            "confidence": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "case": "bug_03_removed_auth.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.8,
+      "tokens": 2267,
+      "raw": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/routes/admin.py",
+            "line": 22,
+            "severity": "high",
+            "message": "Authorization check removed: the endpoint now allows any authenticated user to delete arbitrary users without verifying admin privileges, leading to privilege escalation.",
+            "confidence": 1.0
+          }
+        ]
+      },
+      "final": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/routes/admin.py",
+            "line": 22,
+            "severity": "high",
+            "message": "Authorization check removed: the endpoint now allows any authenticated user to delete arbitrary users without verifying admin privileges, leading to privilege escalation.",
+            "confidence": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "case": "bug_04_cmd_injection.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.1,
+      "tokens": 2364,
+      "raw": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/utils/files.py",
+            "line": 6,
+            "severity": "high",
+            "message": "The function now uses subprocess.run with shell=True and interpolates the 'path' argument directly into the command string, creating a command injection risk if 'path' can be influenced by an attacker.",
+            "confidence": 0.9
+          },
+          {
+            "reviewer": "style",
+            "file": "app/utils/files.py",
+            "line": 7,
+            "severity": "medium",
+            "message": "Switching to a string command with shell=True makes the code harder to read and introduces quoting/escaping issues (e.g., paths with spaces). Using a list argument is safer and clearer.",
+            "confidence": 0.9
+          },
+          {
+            "reviewer": "tests",
+            "file": "app/utils/files.py",
+            "line": 7,
+            "severity": "medium",
+            "message": "Changed subprocess call to use shell=True with a formatted string, altering command execution and potential handling of paths with spaces or special characters. No tests added to cover this new behavior, risking incorrect compression or injection issues.",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "final": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/utils/files.py",
+            "line": 6,
+            "severity": "high",
+            "message": "The function now uses subprocess.run with shell=True and interpolates the 'path' argument directly into the command string, creating a command injection risk if 'path' can be influenced by an attacker.",
+            "confidence": 0.9
+          },
+          {
+            "reviewer": "style",
+            "file": "app/utils/files.py",
+            "line": 7,
+            "severity": "medium",
+            "message": "Switching to a string command with shell=True makes the code harder to read and introduces quoting/escaping issues (e.g., paths with spaces). Using a list argument is safer and clearer.",
+            "confidence": 0.9
+          }
+        ]
+      }
+    },
+    {
+      "case": "bug_05_none_check.diff",
+      "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01jm9j3czdf1ktj7aakt7ybgt5` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7962, Requested 736. Please try again in 5.234999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}"
+    },
+    {
+      "case": "clean_01_rename.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 9.0,
+      "tokens": 1665,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "clean_02_readme.diff",
+      "plan": [
+        "style"
+      ],
+      "seconds": 0.4,
+      "tokens": 442,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "clean_03_log_message.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 5.8,
+      "tokens": 1712,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "clean_04_tested_fix.diff",
+      "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01jm9j3czdf1ktj7aakt7ybgt5` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7516, Requested 1085. Please try again in 4.5075s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}"
+    },
+    {
+      "case": "clean_05_constant.diff",
+      "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01jm9j3czdf1ktj7aakt7ybgt5` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7880, Requested 661. Please try again in 4.0575s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}"
+    }
+  ]
+}

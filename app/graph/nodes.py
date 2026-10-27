@@ -1,4 +1,4 @@
-import sys, json
+import sys, json, re
 from pathlib import Path
 
 from groq import Groq
@@ -40,6 +40,30 @@ FINDINGS_SCHEMA = {
     "additionalProperties": False,
 }
 
+HUNK = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
+
+
+# Prefixes every added and context line with its real line number in the new file,
+# so the model reads line numbers instead of counting them from the @@ header.
+def number_diff(diff: str) -> str:
+    out, new_line = [], None
+    for line in diff.splitlines():
+        m = HUNK.match(line)
+        if m:
+            new_line = int(m.group(1))
+            out.append(line)
+            continue
+        # file headers and "\ No newline" markers stay as they are
+        if new_line is None or line.startswith(("--- a/", "--- /dev/null", "+++ b/", "\\")):
+            out.append(line)
+            continue
+        if line.startswith("-"):
+            out.append(f"{'':>5} {line}")          # removed lines have no new line number
+        else:
+            out.append(f"{new_line:>5} {line}")    # added or unchanged line
+            new_line += 1
+    return "\n".join(out)
+
 
 # ---------- One reviewer call ----------
 
@@ -54,7 +78,7 @@ def run_reviewer(name: str, diff: str) -> tuple[list[Finding], int]:
         temperature=0,  # same input gives (nearly) the same output, so eval scores are comparable
         messages=[
             {"role": "system", "content": system},
-            {"role": "user", "content": diff},
+            {"role": "user", "content": number_diff(diff)},
         ],
         response_format={"type": "json_object"},
     )
@@ -114,7 +138,10 @@ def reviewer(payload: dict) -> dict:
 # Cleans up all findings into one review (plain rules, no LLM yet).
 def synthesizer(state: ReviewState) -> dict:
     # Drop weak findings, unless they're high severity.
-    kept = [f for f in state["findings"] if f.confidence >= 0.6 or f.severity == "high"]
+    # Low-severity comments are nitpicks; keep them out of the main review.
+    # (Confidence alone can't filter them, the model rates its nits 0.9+.)
+    kept = [f for f in state["findings"]
+            if f.severity != "low" and (f.confidence >= 0.6 or f.severity == "high")]
 
     # Merge duplicates: same file and same line, keep the most confident.
     # Only exact lines count, so two different bugs a few lines apart are both kept.

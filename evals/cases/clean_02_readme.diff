@@ -1,0 +1,7 @@
+--- a/README.md
++++ b/README.md
+@@ -3,3 +3,3 @@
+ ## Setup
+ 
+-Instal the dependencies with `pip install -r requirements.txt`.
++Install the dependencies with `pip install -r requirements.txt`.

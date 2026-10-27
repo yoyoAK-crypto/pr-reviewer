@@ -1,0 +1,407 @@
+{
+  "note": "v5 final",
+  "set": "hard",
+  "split": "holdout",
+  "metrics": {
+    "raw": {
+      "recall_strict_%": 100.0,
+      "recall_loose_%": 100.0,
+      "precision_strict_%": 66.7,
+      "precision_loose_%": 72.2,
+      "findings_per_clean_case": 0.67
+    },
+    "final": {
+      "recall_strict_%": 100.0,
+      "recall_loose_%": 100.0,
+      "precision_strict_%": 60.0,
+      "precision_loose_%": 70.0,
+      "findings_per_clean_case": 0.33
+    },
+    "final_recall_strict_by_category_%": {
+      "correctness": 100.0,
+      "security": 100.0
+    },
+    "clean_pass_rate_%": 66.7,
+    "total_tokens": 26902,
+    "avg_tokens_per_pr": 2989,
+    "avg_seconds_per_pr": 3.8,
+    "errors": 0
+  },
+  "cases": [
+    {
+      "case": "bug_shell_archive.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 7.8,
+      "tokens": 3345,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/services/files.py",
+          "line": 44,
+          "severity": "high",
+          "message": "Using shell=True with a command string built from the 'folder' and 'dest' parameters allows command injection if those arguments are attacker-controlled. Previously the code used a list argument to subprocess.run which avoided this risk.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 44,
+          "severity": "medium",
+          "message": "Using shell=True with a formatted command string can cause bugs when paths contain spaces or special characters, and it bypasses the safety of passing arguments as a list. Prefer passing a list to subprocess.run without shell=True, or properly quote/escape the components.",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/files.py",
+          "line": 42,
+          "severity": "medium",
+          "message": "Added optional compress flag introduces a branch that selects tar flags; the non\u2011compressed path (compress=False) is not covered by tests, potentially resulting in incorrect archive creation.",
+          "confidence": 0.8,
+          "hit": "location_only"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 44,
+          "severity": "medium",
+          "message": "Using shell=True with a formatted command string can cause bugs when paths contain spaces or special characters, and it bypasses the safety of passing arguments as a list. Prefer passing a list to subprocess.run without shell=True, or properly quote/escape the components.",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/files.py",
+          "line": 42,
+          "severity": "medium",
+          "message": "Added optional compress flag introduces a branch that selects tar flags; the non\u2011compressed path (compress=False) is not covered by tests, potentially resulting in incorrect archive creation.",
+          "confidence": 0.8,
+          "hit": "location_only"
+        }
+      ]
+    },
+    {
+      "case": "bug_log_password.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 4.6,
+      "tokens": 2997,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/api/auth.py",
+          "line": 46,
+          "severity": "medium",
+          "message": "Logging the plaintext password on failed login attempts can expose credentials in logs, leading to credential leakage if logs are accessed by unauthorized parties.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 19,
+          "severity": "medium",
+          "message": "TOKEN_TTL increased from 1 hour to 2 hours, altering token expiration behavior without accompanying test coverage",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/api/auth.py",
+          "line": 46,
+          "severity": "medium",
+          "message": "Logging the plaintext password on failed login attempts can expose credentials in logs, leading to credential leakage if logs are accessed by unauthorized parties.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 19,
+          "severity": "medium",
+          "message": "TOKEN_TTL increased from 1 hour to 2 hours, altering token expiration behavior without accompanying test coverage",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_cors_wildcard.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.9,
+      "tokens": 2823,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/api/main.py",
+          "line": 19,
+          "severity": "medium",
+          "message": "CORS configuration changed to allow all origins (\"*\") instead of using the restricted list from ALLOWED_ORIGINS, creating an overly permissive CORS policy that can expose the API to CSRF attacks from any site.",
+          "confidence": 1.0,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/main.py",
+          "line": 19,
+          "severity": "medium",
+          "message": "Changing CORS allow_origins to ['*'] alters request origin validation but no tests appear to cover this new permissive behavior.",
+          "confidence": 0.7,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/api/main.py",
+          "line": 19,
+          "severity": "medium",
+          "message": "CORS configuration changed to allow all origins (\"*\") instead of using the restricted list from ALLOWED_ORIGINS, creating an overly permissive CORS policy that can expose the API to CSRF attacks from any site.",
+          "confidence": 1.0,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_soft_delete_column.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.0,
+      "tokens": 3005,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 48,
+          "severity": "medium",
+          "message": "The soft\u2011delete query updates rows where `email = ?` but passes `user_id` as the parameter, likely a bug \u2013 it should filter on the `id` column instead of `email`.",
+          "confidence": 0.95,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 48,
+          "severity": "high",
+          "message": "Soft delete now updates rows where email equals the numeric user_id, likely affecting zero rows and leaving the user active. This change in delete behavior is not covered by tests, risking incorrect user state.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 48,
+          "severity": "medium",
+          "message": "The soft\u2011delete query updates rows where `email = ?` but passes `user_id` as the parameter, likely a bug \u2013 it should filter on the `id` column instead of `email`.",
+          "confidence": 0.95,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_round_precision.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.1,
+      "tokens": 2765,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 35,
+          "severity": "medium",
+          "message": "Rounding total to one decimal place instead of two changes monetary precision and may introduce subtle bugs; the intent is unclear and should be documented or reviewed.",
+          "confidence": 0.92,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 35,
+          "severity": "high",
+          "message": "Changed rounding in total() from two to one decimal place, altering monetary calculation. No test added to verify the new rounding behavior, risking incorrect totals.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 35,
+          "severity": "medium",
+          "message": "Rounding total to one decimal place instead of two changes monetary precision and may introduce subtle bugs; the intent is unclear and should be documented or reviewed.",
+          "confidence": 0.92,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_counter_race.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.6,
+      "tokens": 3303,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 21,
+          "severity": "high",
+          "message": "Removed thread\u2011safety lock from JobStats.record; concurrent updates to processed/failed counters can race, leading to incorrect statistics.",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 11,
+          "severity": "low",
+          "message": "Changing MAX_ATTEMPTS from 3 to 5 may affect retry behavior but is a simple constant change; no readability or logic issue.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 20,
+          "severity": "low",
+          "message": "The _lock attribute (presumably defined elsewhere in JobStats) is now unused after removing the lock block, resulting in dead code.",
+          "confidence": 0.85,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 11,
+          "severity": "medium",
+          "message": "Increasing MAX_ATTEMPTS from 3 to 5 changes retry behavior but no tests appear to cover the new attempt limit, risking untested retry logic.",
+          "confidence": 0.73,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 21,
+          "severity": "medium",
+          "message": "Removing the thread\u2011safety lock in JobStats.record changes counting logic under concurrency; no tests seem to verify correct counts when accessed from multiple coroutines/threads.",
+          "confidence": 0.71,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 21,
+          "severity": "high",
+          "message": "Removed thread\u2011safety lock from JobStats.record; concurrent updates to processed/failed counters can race, leading to incorrect statistics.",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 11,
+          "severity": "medium",
+          "message": "Increasing MAX_ATTEMPTS from 3 to 5 changes retry behavior but no tests appear to cover the new attempt limit, risking untested retry logic.",
+          "confidence": 0.73,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "clean_request_timing_log.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.7,
+      "tokens": 2921,
+      "raw": [
+        {
+          "reviewer": "tests",
+          "file": "app/api/main.py",
+          "line": 30,
+          "severity": "low",
+          "message": "Added timing measurement and logging of elapsed request time, but no tests cover this new logging behavior, potentially missing verification of the elapsed time output.",
+          "confidence": 0.78,
+          "hit": "miss"
+        }
+      ],
+      "final": []
+    },
+    {
+      "case": "clean_users_docstrings.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.6,
+      "tokens": 2794,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 24,
+          "severity": "medium",
+          "message": "The docstring claims a case\u2011insensitive search, but the SQL uses a plain LIKE which may be case\u2011sensitive depending on the database collation; the comment could mislead readers about the actual behavior.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 24,
+          "severity": "medium",
+          "message": "The docstring claims a case\u2011insensitive search, but the SQL uses a plain LIKE which may be case\u2011sensitive depending on the database collation; the comment could mislead readers about the actual behavior.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "clean_installments_cap.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 7.0,
+      "tokens": 2949,
+      "raw": [],
+      "final": []
+    }
+  ]
+}

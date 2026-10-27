@@ -1,0 +1,17 @@
+--- a/app/services/billing.py
++++ b/app/services/billing.py
+@@ -18,12 +18,13 @@
+ 
+ 
+ def subtotal(invoice: Invoice) -> float:
++    """Sum of line items before discount and tax."""
+     return sum(item.unit_price * item.qty for item in invoice.items)
+ 
+ 
+ def discount(amount: float) -> float:
+     """Orders of 100 or more get the bulk discount."""
+-    if amount >= 100:
++    if amount > 100:
+         return amount * BULK_DISCOUNT
+     return 0.0
+ 

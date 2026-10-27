@@ -1,0 +1,9 @@
+--- a/app/utils/files.py
++++ b/app/utils/files.py
+@@ -1,5 +1,5 @@
+ import subprocess
+ 
+ 
+ def compress(path: str) -> None:
+-    subprocess.run(["gzip", path], check=True)
++    subprocess.run(f"gzip {path}", shell=True, check=True)

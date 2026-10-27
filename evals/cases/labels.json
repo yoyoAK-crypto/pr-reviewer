@@ -1,0 +1,22 @@
+{
+  "bug_01_sqli.diff": {
+    "bugs": [{"file": "app/auth.py", "lines": [10, 11], "type": "sql_injection", "severity": "high"}]
+  },
+  "bug_02_secret.diff": {
+    "bugs": [{"file": "app/payments.py", "lines": [4, 4], "type": "hardcoded_secret", "severity": "high"}]
+  },
+  "bug_03_removed_auth.diff": {
+    "bugs": [{"file": "app/routes/admin.py", "lines": [22, 23], "type": "removed_auth_check", "severity": "high"}]
+  },
+  "bug_04_cmd_injection.diff": {
+    "bugs": [{"file": "app/utils/files.py", "lines": [5, 5], "type": "command_injection", "severity": "high"}]
+  },
+  "bug_05_none_check.diff": {
+    "bugs": [{"file": "app/orders.py", "lines": [15, 15], "type": "missing_none_check", "severity": "medium"}]
+  },
+  "clean_01_rename.diff": {"bugs": []},
+  "clean_02_readme.diff": {"bugs": []},
+  "clean_03_log_message.diff": {"bugs": []},
+  "clean_04_tested_fix.diff": {"bugs": []},
+  "clean_05_constant.diff": {"bugs": []}
+}

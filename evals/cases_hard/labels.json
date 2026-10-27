@@ -1,0 +1,480 @@
+{
+  "bug_sqli_search.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/repositories/users.py",
+        "lines": [
+          25,
+          26
+        ],
+        "type": "sql_injection",
+        "category": "security",
+        "severity": "high",
+        "keywords": [
+          "sql",
+          "inject",
+          "parameter"
+        ]
+      }
+    ]
+  },
+  "bug_path_traversal.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/services/files.py",
+        "lines": [
+          32,
+          32
+        ],
+        "type": "path_traversal",
+        "category": "security",
+        "severity": "high",
+        "keywords": [
+          "traversal",
+          "path",
+          "escape",
+          "directory",
+          "_safe_path"
+        ]
+      }
+    ]
+  },
+  "bug_shell_archive.diff": {
+    "split": "holdout",
+    "bugs": [
+      {
+        "file": "app/services/files.py",
+        "lines": [
+          43,
+          44
+        ],
+        "type": "command_injection",
+        "category": "security",
+        "severity": "high",
+        "keywords": [
+          "shell",
+          "inject"
+        ]
+      }
+    ]
+  },
+  "bug_jwt_no_verify.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/api/auth.py",
+        "lines": [
+          33,
+          37
+        ],
+        "type": "jwt_signature_disabled",
+        "category": "security",
+        "severity": "high",
+        "keywords": [
+          "signature",
+          "verif"
+        ]
+      }
+    ]
+  },
+  "bug_timing_compare.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/api/auth.py",
+        "lines": [
+          45,
+          45
+        ],
+        "type": "timing_attack",
+        "category": "security",
+        "severity": "medium",
+        "keywords": [
+          "timing",
+          "compare_digest",
+          "constant"
+        ]
+      }
+    ]
+  },
+  "bug_log_password.diff": {
+    "split": "holdout",
+    "bugs": [
+      {
+        "file": "app/api/auth.py",
+        "lines": [
+          46,
+          46
+        ],
+        "type": "secret_in_logs",
+        "category": "security",
+        "severity": "high",
+        "keywords": [
+          "password",
+          "sensitive",
+          "plaintext",
+          "credential"
+        ]
+      }
+    ]
+  },
+  "bug_yaml_load.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/utils/config_loader.py",
+        "lines": [
+          13,
+          13
+        ],
+        "type": "unsafe_deserialization",
+        "category": "security",
+        "severity": "high",
+        "keywords": [
+          "safe_load",
+          "loader",
+          "deserializ",
+          "arbitrary",
+          "unsafe"
+        ]
+      }
+    ]
+  },
+  "bug_eval_coerce.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/utils/config_loader.py",
+        "lines": [
+          20,
+          20
+        ],
+        "type": "code_injection",
+        "category": "security",
+        "severity": "high",
+        "keywords": [
+          "eval",
+          "execut",
+          "literal_eval",
+          "inject"
+        ]
+      }
+    ]
+  },
+  "bug_cors_wildcard.diff": {
+    "split": "holdout",
+    "bugs": [
+      {
+        "file": "app/api/main.py",
+        "lines": [
+          19,
+          19
+        ],
+        "type": "cors_misconfig",
+        "category": "security",
+        "severity": "high",
+        "keywords": [
+          "cors",
+          "origin",
+          "credential",
+          "wildcard"
+        ]
+      }
+    ]
+  },
+  "bug_tls_verify_off.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/api/main.py",
+        "lines": [
+          41,
+          41
+        ],
+        "type": "tls_verification_disabled",
+        "category": "security",
+        "severity": "high",
+        "keywords": [
+          "verify",
+          "tls",
+          "ssl",
+          "certificate"
+        ]
+      }
+    ]
+  },
+  "bug_page_offset.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/repositories/users.py",
+        "lines": [
+          38,
+          38
+        ],
+        "type": "off_by_one",
+        "category": "correctness",
+        "severity": "medium",
+        "keywords": [
+          "offset",
+          "off-by-one",
+          "off by one",
+          "first page",
+          "skip"
+        ]
+      }
+    ]
+  },
+  "bug_soft_delete_column.diff": {
+    "split": "holdout",
+    "bugs": [
+      {
+        "file": "app/repositories/users.py",
+        "lines": [
+          48,
+          48
+        ],
+        "type": "wrong_column",
+        "category": "correctness",
+        "severity": "high",
+        "keywords": [
+          "email",
+          "column",
+          "mismatch",
+          "wrong"
+        ]
+      }
+    ]
+  },
+  "bug_append_mode.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/services/files.py",
+        "lines": [
+          26,
+          26
+        ],
+        "type": "wrong_file_mode",
+        "category": "correctness",
+        "severity": "medium",
+        "keywords": [
+          "append",
+          "overwrit",
+          "mode"
+        ]
+      }
+    ]
+  },
+  "bug_mutable_default.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/services/billing.py",
+        "lines": [
+          47,
+          47
+        ],
+        "type": "mutable_default_argument",
+        "category": "correctness",
+        "severity": "medium",
+        "keywords": [
+          "mutable",
+          "default",
+          "shared"
+        ]
+      }
+    ]
+  },
+  "bug_discount_boundary.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/services/billing.py",
+        "lines": [
+          27,
+          27
+        ],
+        "type": "boundary_condition",
+        "category": "correctness",
+        "severity": "medium",
+        "keywords": [
+          ">=",
+          "boundary",
+          "or more",
+          "inclusive",
+          "exactly"
+        ]
+      }
+    ]
+  },
+  "bug_round_precision.diff": {
+    "split": "holdout",
+    "bugs": [
+      {
+        "file": "app/services/billing.py",
+        "lines": [
+          35,
+          35
+        ],
+        "type": "rounding",
+        "category": "correctness",
+        "severity": "medium",
+        "keywords": [
+          "round",
+          "decimal",
+          "cent",
+          "precision"
+        ]
+      }
+    ]
+  },
+  "bug_floor_division.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/services/billing.py",
+        "lines": [
+          41,
+          41
+        ],
+        "type": "integer_division",
+        "category": "correctness",
+        "severity": "medium",
+        "keywords": [
+          "//",
+          "floor",
+          "integer",
+          "truncat",
+          "division"
+        ]
+      }
+    ]
+  },
+  "bug_swallowed_error.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/workers/jobs.py",
+        "lines": [
+          46,
+          47
+        ],
+        "type": "swallowed_exception",
+        "category": "correctness",
+        "severity": "high",
+        "keywords": [
+          "swallow",
+          "silent",
+          "ignor",
+          "pass",
+          "success"
+        ]
+      }
+    ]
+  },
+  "bug_missing_await.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/workers/jobs.py",
+        "lines": [
+          36,
+          36
+        ],
+        "type": "missing_await",
+        "category": "correctness",
+        "severity": "high",
+        "keywords": [
+          "await",
+          "coroutine"
+        ]
+      }
+    ]
+  },
+  "bug_counter_race.diff": {
+    "split": "holdout",
+    "bugs": [
+      {
+        "file": "app/workers/jobs.py",
+        "lines": [
+          21,
+          21
+        ],
+        "type": "race_condition",
+        "category": "correctness",
+        "severity": "medium",
+        "keywords": [
+          "race",
+          "lock",
+          "thread",
+          "atomic"
+        ]
+      }
+    ]
+  },
+  "bug_inverted_override.diff": {
+    "split": "tune",
+    "bugs": [
+      {
+        "file": "app/utils/config_loader.py",
+        "lines": [
+          19,
+          19
+        ],
+        "type": "inverted_condition",
+        "category": "correctness",
+        "severity": "high",
+        "keywords": [
+          "none",
+          "invert",
+          "condition",
+          "never",
+          "override"
+        ]
+      }
+    ]
+  },
+  "clean_get_many_in_clause.diff": {
+    "split": "tune",
+    "bugs": []
+  },
+  "clean_archive_exclude.diff": {
+    "split": "tune",
+    "bugs": []
+  },
+  "clean_literal_eval_coerce.diff": {
+    "split": "tune",
+    "bugs": []
+  },
+  "clean_verify_password_helper.diff": {
+    "split": "tune",
+    "bugs": []
+  },
+  "clean_extract_apply_tax.diff": {
+    "split": "tune",
+    "bugs": []
+  },
+  "clean_request_timing_log.diff": {
+    "split": "holdout",
+    "bugs": []
+  },
+  "clean_stats_snapshot.diff": {
+    "split": "tune",
+    "bugs": []
+  },
+  "clean_users_docstrings.diff": {
+    "split": "holdout",
+    "bugs": []
+  },
+  "clean_safe_path_relative_to.diff": {
+    "split": "tune",
+    "bugs": []
+  },
+  "clean_installments_cap.diff": {
+    "split": "holdout",
+    "bugs": []
+  }
+}

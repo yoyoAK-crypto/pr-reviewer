@@ -1,0 +1,24 @@
+--- a/app/workers/jobs.py
++++ b/app/workers/jobs.py
+@@ -24,6 +24,10 @@
+             else:
+                 self.failed += 1
+ 
++    def snapshot(self) -> dict[str, int]:
++        with self._lock:
++            return {"processed": self.processed, "failed": self.failed}
++
+ 
+ async def fetch_status(client: httpx.AsyncClient, job_id: str) -> str:
+     resp = await client.get(STATUS_URL.format(job_id=job_id), timeout=10)
+--- /dev/null
++++ b/tests/test_jobs.py
+@@ -0,0 +1,8 @@
++from app.workers.jobs import JobStats
++
++
++def test_snapshot_reflects_recorded_results():
++    stats = JobStats()
++    stats.record(ok=True)
++    stats.record(ok=False)
++    assert stats.snapshot() == {"processed": 1, "failed": 1}

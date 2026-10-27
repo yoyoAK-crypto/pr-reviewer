@@ -1,0 +1,337 @@
+{
+  "note": "v0 baseline",
+  "metrics": {
+    "raw": {
+      "recall_%": 100.0,
+      "precision_%": 100.0,
+      "findings_per_clean_case": 0.0
+    },
+    "final": {
+      "recall_%": 100.0,
+      "precision_%": 100.0,
+      "findings_per_clean_case": 0.0
+    },
+    "clean_pass_rate_%": 100.0,
+    "total_tokens": 19092,
+    "avg_seconds_per_pr": 2.7,
+    "errors": 0
+  },
+  "cases": [
+    {
+      "case": "bug_01_sqli.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.7,
+      "tokens": 2139,
+      "raw": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/auth.py",
+            "line": 10,
+            "severity": "high",
+            "message": "SQL injection vulnerability: user-supplied 'username' is interpolated directly into the query string without parameterization, allowing an attacker to inject arbitrary SQL.",
+            "confidence": 1.0
+          }
+        ]
+      },
+      "final": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/auth.py",
+            "line": 10,
+            "severity": "high",
+            "message": "SQL injection vulnerability: user-supplied 'username' is interpolated directly into the query string without parameterization, allowing an attacker to inject arbitrary SQL.",
+            "confidence": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "case": "bug_02_secret.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.1,
+      "tokens": 2140,
+      "raw": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/payments.py",
+            "line": 5,
+            "severity": "high",
+            "message": "Hardcoded Stripe secret key is embedded in source code, exposing credentials and allowing unauthorized API access. Replace with secure retrieval from environment variables or secret manager.",
+            "confidence": 1.0
+          },
+          {
+            "reviewer": "tests",
+            "file": "app/payments.py",
+            "line": 5,
+            "severity": "high",
+            "message": "Hardcoded Stripe secret key replaces environment variable, changing authentication behavior and is not covered by tests",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "final": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/payments.py",
+            "line": 5,
+            "severity": "high",
+            "message": "Hardcoded Stripe secret key is embedded in source code, exposing credentials and allowing unauthorized API access. Replace with secure retrieval from environment variables or secret manager.",
+            "confidence": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "case": "bug_03_removed_auth.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.9,
+      "tokens": 2082,
+      "raw": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/routes/admin.py",
+            "line": 22,
+            "severity": "high",
+            "message": "Removed admin authorization check; now any authenticated user can delete arbitrary users, leading to privilege escalation.",
+            "confidence": 1.0
+          }
+        ]
+      },
+      "final": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/routes/admin.py",
+            "line": 22,
+            "severity": "high",
+            "message": "Removed admin authorization check; now any authenticated user can delete arbitrary users, leading to privilege escalation.",
+            "confidence": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "case": "bug_04_cmd_injection.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.4,
+      "tokens": 2340,
+      "raw": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/utils/files.py",
+            "line": 7,
+            "severity": "high",
+            "message": "Using shell=True with a formatted command string allows command injection if 'path' can be influenced by an attacker. The original list form avoided shell interpretation. Replace with a list argument or properly sanitize the input.",
+            "confidence": 1.0
+          },
+          {
+            "reviewer": "style",
+            "file": "app/utils/files.py",
+            "line": 5,
+            "severity": "medium",
+            "message": "Switching to a string command with shell=True introduces quoting and injection risks and makes the intent less clear; using a list argument (as before) is safer and more robust.",
+            "confidence": 0.9
+          },
+          {
+            "reviewer": "tests",
+            "file": "app/utils/files.py",
+            "line": 7,
+            "severity": "medium",
+            "message": "Changed subprocess call to use shell=True with a formatted string, altering command execution semantics (e.g., handling of spaces or special characters in 'path'). No tests appear to cover this new behavior, risking incorrect compression or failures for such inputs.",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "final": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/utils/files.py",
+            "line": 7,
+            "severity": "high",
+            "message": "Using shell=True with a formatted command string allows command injection if 'path' can be influenced by an attacker. The original list form avoided shell interpretation. Replace with a list argument or properly sanitize the input.",
+            "confidence": 1.0
+          },
+          {
+            "reviewer": "style",
+            "file": "app/utils/files.py",
+            "line": 5,
+            "severity": "medium",
+            "message": "Switching to a string command with shell=True introduces quoting and injection risks and makes the intent less clear; using a list argument (as before) is safer and more robust.",
+            "confidence": 0.9
+          }
+        ]
+      }
+    },
+    {
+      "case": "bug_05_none_check.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 3.0,
+      "tokens": 2563,
+      "raw": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/orders.py",
+            "line": 13,
+            "severity": "medium",
+            "message": "The discount is calculated directly from order.coupon.percent without validation. If an attacker can influence the coupon percent (e.g., by creating a coupon with >100% discount), the resulting total could become negative or otherwise incorrect, leading to potential financial abuse.",
+            "confidence": 0.8
+          },
+          {
+            "reviewer": "style",
+            "file": "app/orders.py",
+            "line": 13,
+            "severity": "medium",
+            "message": "Assumes order.coupon is always present; accessing order.coupon.percent will raise AttributeError when no coupon is attached, leading to runtime errors.",
+            "confidence": 0.8
+          },
+          {
+            "reviewer": "tests",
+            "file": "app/orders.py",
+            "line": 13,
+            "severity": "medium",
+            "message": "Added discount calculation using order.coupon.percent, changing the return value. No tests in this diff cover scenarios with coupons, so the discounted total behavior is untested.",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "final": {
+        "caught": 1,
+        "findings": [
+          {
+            "reviewer": "security",
+            "file": "app/orders.py",
+            "line": 13,
+            "severity": "medium",
+            "message": "The discount is calculated directly from order.coupon.percent without validation. If an attacker can influence the coupon percent (e.g., by creating a coupon with >100% discount), the resulting total could become negative or otherwise incorrect, leading to potential financial abuse.",
+            "confidence": 0.8
+          }
+        ]
+      }
+    },
+    {
+      "case": "clean_01_rename.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.7,
+      "tokens": 1666,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "clean_02_readme.diff",
+      "plan": [
+        "style"
+      ],
+      "seconds": 0.5,
+      "tokens": 442,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "clean_03_log_message.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.2,
+      "tokens": 1692,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "clean_04_tested_fix.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.0,
+      "tokens": 2130,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "clean_05_constant.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.2,
+      "tokens": 1898,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    }
+  ]
+}

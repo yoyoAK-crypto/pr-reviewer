@@ -1,0 +1,17 @@
+--- a/app/utils/config_loader.py
++++ b/app/utils/config_loader.py
+@@ -16,7 +16,7 @@
+ def _apply_env_overrides(config: dict) -> dict:
+     for key in config:
+         env_value = os.getenv(ENV_PREFIX + key.upper())
+-        if env_value is not None:
++        if env_value is None:
+             config[key] = env_value
+     return config
+ 
+@@ -28,4 +28,5 @@
+ 
+ 
+ def get(key: str, default=None):
++    """Read one config value, falling back to default."""
+     return load_config().get(key, default)

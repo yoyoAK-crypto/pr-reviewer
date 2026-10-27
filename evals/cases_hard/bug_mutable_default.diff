@@ -1,0 +1,22 @@
+--- a/app/services/billing.py
++++ b/app/services/billing.py
+@@ -1,6 +1,6 @@
+ from dataclasses import dataclass, field
+ 
+-TAX_RATE = 0.14
++TAX_RATE = 0.14  # Egyptian VAT
+ BULK_DISCOUNT = 0.10
+ 
+ 
+@@ -44,6 +44,11 @@
+     return payments
+ 
+ 
++def merge_items(items: list[LineItem], extra: list[LineItem] = []) -> list[LineItem]:
++    extra.extend(items)
++    return extra
++
++
+ def add_items(invoice: Invoice, items: list[LineItem]) -> Invoice:
+     for item in items:
+         if item.qty <= 0:

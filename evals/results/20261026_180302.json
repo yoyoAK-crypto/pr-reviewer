@@ -1,0 +1,143 @@
+{
+  "note": "v0 baseline",
+  "metrics": {
+    "raw": {
+      "recall_%": 0.0,
+      "precision_%": null,
+      "findings_per_clean_case": 0.0
+    },
+    "final": {
+      "recall_%": 0.0,
+      "precision_%": null,
+      "findings_per_clean_case": 0.0
+    },
+    "clean_pass_rate_%": 100.0,
+    "total_tokens": 11147,
+    "avg_seconds_per_pr": 3.1,
+    "errors": 4
+  },
+  "cases": [
+    {
+      "case": "bug_01_sqli.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.7,
+      "tokens": 2205,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "bug_02_secret.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.6,
+      "tokens": 2179,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "bug_03_removed_auth.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.1,
+      "tokens": 2200,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "bug_04_cmd_injection.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.6,
+      "tokens": 2368,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "bug_05_none_check.diff",
+      "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01jm9j3czdf1ktj7aakt7ybgt5` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7866, Requested 747. Please try again in 4.5975s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}"
+    },
+    {
+      "case": "clean_01_rename.diff",
+      "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01jm9j3czdf1ktj7aakt7ybgt5` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7667, Requested 1052. Please try again in 5.3925s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}"
+    },
+    {
+      "case": "clean_02_readme.diff",
+      "plan": [
+        "style"
+      ],
+      "seconds": 0.4,
+      "tokens": 442,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "clean_03_log_message.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 11.3,
+      "tokens": 1753,
+      "raw": {
+        "caught": 0,
+        "findings": []
+      },
+      "final": {
+        "caught": 0,
+        "findings": []
+      }
+    },
+    {
+      "case": "clean_04_tested_fix.diff",
+      "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01jm9j3czdf1ktj7aakt7ybgt5` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7957, Requested 883. Please try again in 6.3s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}"
+    },
+    {
+      "case": "clean_05_constant.diff",
+      "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01jm9j3czdf1ktj7aakt7ybgt5` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7161, Requested 1072. Please try again in 1.7475s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}"
+    }
+  ]
+}

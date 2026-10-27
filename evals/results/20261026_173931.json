@@ -1,0 +1,61 @@
+{
+  "note": "v2 baseline",
+  "metrics": {
+    "raw": {
+      "recall_%": null,
+      "precision_%": null,
+      "findings_per_clean_case": null
+    },
+    "final": {
+      "recall_%": null,
+      "precision_%": null,
+      "findings_per_clean_case": null
+    },
+    "clean_pass_rate_%": null,
+    "total_tokens": 0,
+    "avg_seconds_per_pr": null,
+    "errors": 10
+  },
+  "cases": [
+    {
+      "case": "bug_01_sqli.diff",
+      "error": "Connection error."
+    },
+    {
+      "case": "bug_02_secret.diff",
+      "error": "Connection error."
+    },
+    {
+      "case": "bug_03_removed_auth.diff",
+      "error": "Connection error."
+    },
+    {
+      "case": "bug_04_cmd_injection.diff",
+      "error": "Connection error."
+    },
+    {
+      "case": "bug_05_none_check.diff",
+      "error": "Connection error."
+    },
+    {
+      "case": "clean_01_rename.diff",
+      "error": "Connection error."
+    },
+    {
+      "case": "clean_02_readme.diff",
+      "error": "Connection error."
+    },
+    {
+      "case": "clean_03_log_message.diff",
+      "error": "Connection error."
+    },
+    {
+      "case": "clean_04_tested_fix.diff",
+      "error": "Connection error."
+    },
+    {
+      "case": "clean_05_constant.diff",
+      "error": "Connection error."
+    }
+  ]
+}

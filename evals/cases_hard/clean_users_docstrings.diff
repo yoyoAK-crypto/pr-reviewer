@@ -1,0 +1,23 @@
+--- a/app/repositories/users.py
++++ b/app/repositories/users.py
+@@ -14,12 +14,14 @@
+         self.conn = conn
+ 
+     def get_by_id(self, user_id: int) -> User | None:
++        """Return the user with this id, or None if missing."""
+         row = self.conn.execute(
+             "SELECT id, name, email FROM users WHERE id = ?", (user_id,)
+         ).fetchone()
+         return User(*row) if row else None
+ 
+     def search(self, term: str) -> list[User]:
++        """Case-insensitive substring search on name."""
+         rows = self.conn.execute(
+             "SELECT id, name, email FROM users WHERE name LIKE ?",
+             (f"%{term}%",),
+@@ -47,4 +49,5 @@
+         self.conn.commit()
+ 
+     def count(self) -> int:
++        """Total number of users, including inactive ones."""
+         return self.conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]

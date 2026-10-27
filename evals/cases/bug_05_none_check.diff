@@ -1,0 +1,10 @@
+--- a/app/orders.py
++++ b/app/orders.py
+@@ -12,4 +12,6 @@ from app.db import get_order
+ 
+ def order_total(order_id: int) -> float:
+     order = get_order(order_id)
+-    return sum(item.price * item.qty for item in order.items)
++    discount = order.coupon.percent / 100
++    subtotal = sum(item.price * item.qty for item in order.items)
++    return subtotal * (1 - discount)

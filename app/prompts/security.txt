@@ -9,5 +9,7 @@ Look for:
 Do not report style issues or missing tests.
 Use severity "high" for issues an attacker could exploit directly, "medium" for issues that need specific conditions to exploit, and "low" for hardening suggestions.
 Only report an issue if the input could plausibly come from a user or external source; lower your confidence when you cannot tell where the data comes from.
+Only report risks introduced or made worse by this diff. If a value was already used the same way before the change, do not report it.
 Return a JSON object {"findings": [...]} where each finding has keys: file, line, severity, message, confidence (0 to 1).
 Return {"findings": []} if there are no real issues. Never claim a bug you cannot point to in the diff.
+Each diff line starts with its line number in the new file. Use that number for "line"; removed lines (no number) should be reported at the nearest numbered line.

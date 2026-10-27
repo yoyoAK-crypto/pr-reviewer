@@ -1,0 +1,27 @@
+--- a/app/workers/jobs.py
++++ b/app/workers/jobs.py
+@@ -8,7 +8,7 @@
+ logger = logging.getLogger(__name__)
+ 
+ STATUS_URL = "https://jobs.internal/api/status/{job_id}"
+-MAX_ATTEMPTS = 3
++MAX_ATTEMPTS = 5
+ 
+ 
+ class JobStats:
+@@ -18,11 +18,10 @@
+         self.failed = 0
+ 
+     def record(self, ok: bool) -> None:
+-        with self._lock:
+-            if ok:
+-                self.processed += 1
+-            else:
+-                self.failed += 1
++        if ok:
++            self.processed += 1
++        else:
++            self.failed += 1
+ 
+ 
+ async def fetch_status(client: httpx.AsyncClient, job_id: str) -> str:

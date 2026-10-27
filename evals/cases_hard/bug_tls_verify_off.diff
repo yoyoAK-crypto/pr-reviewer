@@ -1,0 +1,16 @@
+--- a/app/api/main.py
++++ b/app/api/main.py
+@@ -33,11 +33,11 @@
+ 
+ @app.get("/health")
+ def health() -> dict:
+-    return {"status": "ok"}
++    return {"status": "ok", "service": "orders"}
+ 
+ 
+ @app.get("/weather/{city}")
+ def weather(city: str) -> dict:
+-    resp = requests.get(WEATHER_API, params={"city": city}, timeout=5)
++    resp = requests.get(WEATHER_API, params={"city": city}, timeout=5, verify=False)
+     resp.raise_for_status()
+     return resp.json()

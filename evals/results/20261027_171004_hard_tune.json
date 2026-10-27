@@ -1,0 +1,981 @@
+{
+  "note": "v5 severity rubric + diff-only scope",
+  "set": "hard",
+  "split": "tune",
+  "metrics": {
+    "raw": {
+      "recall_strict_%": 93.3,
+      "recall_loose_%": 93.3,
+      "precision_strict_%": 65.2,
+      "precision_loose_%": 67.4,
+      "findings_per_clean_case": 0.71
+    },
+    "final": {
+      "recall_strict_%": 93.3,
+      "recall_loose_%": 93.3,
+      "precision_strict_%": 65.4,
+      "precision_loose_%": 65.4,
+      "findings_per_clean_case": 0.29
+    },
+    "final_recall_strict_by_category_%": {
+      "correctness": 100.0,
+      "security": 85.7
+    },
+    "clean_pass_rate_%": 71.4,
+    "total_tokens": 74764,
+    "avg_tokens_per_pr": 3398,
+    "avg_seconds_per_pr": 3.8,
+    "errors": 0
+  },
+  "cases": [
+    {
+      "case": "bug_sqli_search.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 4.5,
+      "tokens": 4309,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/repositories/users.py",
+          "line": 25,
+          "severity": "high",
+          "message": "The search() method builds an SQL query by directly interpolating the 'term' and 'order_by' parameters into the query string using string formatting and concatenation, which enables SQL injection. An attacker could supply crafted input to execute arbitrary SQL, modify the ORDER BY clause, or retrieve unauthorized data.",
+          "confidence": 0.95,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 22,
+          "severity": "high",
+          "message": "The `search` method builds its SQL query by interpolating `term` and `order_by` directly into the query string, which opens the code to SQL injection attacks. Use parameterized queries for `term` and whitelist/validate `order_by` values instead of string concatenation.",
+          "confidence": 0.99,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 25,
+          "severity": "high",
+          "message": "Using the `%` operator to embed `term` into the LIKE clause (`'%%%s%%' % term`) can break if `term` contains `%` or other formatting characters and also bypasses parameter binding, increasing injection risk.",
+          "confidence": 0.95,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 26,
+          "severity": "high",
+          "message": "`order_by` is concatenated directly into the SQL statement without any validation, allowing an attacker to inject arbitrary SQL. Validate against an allowed list of column names or use safe query construction.",
+          "confidence": 0.98,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 26,
+          "severity": "medium",
+          "message": "The new `order_by` parameter is concatenated directly into the SQL query, changing query behavior and allowing callers to affect ordering or cause SQL errors. No tests appear to cover custom order_by values or potential malformed inputs, so this new branch is untested.",
+          "confidence": 0.75,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 22,
+          "severity": "high",
+          "message": "The `search` method builds its SQL query by interpolating `term` and `order_by` directly into the query string, which opens the code to SQL injection attacks. Use parameterized queries for `term` and whitelist/validate `order_by` values instead of string concatenation.",
+          "confidence": 0.99,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 26,
+          "severity": "high",
+          "message": "`order_by` is concatenated directly into the SQL statement without any validation, allowing an attacker to inject arbitrary SQL. Validate against an allowed list of column names or use safe query construction.",
+          "confidence": 0.98,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "security",
+          "file": "app/repositories/users.py",
+          "line": 25,
+          "severity": "high",
+          "message": "The search() method builds an SQL query by directly interpolating the 'term' and 'order_by' parameters into the query string using string formatting and concatenation, which enables SQL injection. An attacker could supply crafted input to execute arbitrary SQL, modify the ORDER BY clause, or retrieve unauthorized data.",
+          "confidence": 0.95,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_path_traversal.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 7.8,
+      "tokens": 3504,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/services/files.py",
+          "line": 32,
+          "severity": "high",
+          "message": "Removed call to _safe_path and directly concatenated user\u2011provided filename to BASE_DIR, enabling path traversal attacks (e.g., \"../../etc/passwd\"). This allows reading arbitrary files on the server.",
+          "confidence": 0.92,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/files.py",
+          "line": 7,
+          "severity": "medium",
+          "message": "Increased MAX_UPLOAD_BYTES from 10\u202fMB to 20\u202fMB; larger uploads are now allowed but existing tests likely only cover the previous 10\u202fMB limit, leaving the new size range untested.",
+          "confidence": 0.7,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/files.py",
+          "line": 32,
+          "severity": "medium",
+          "message": "read_file now builds the path with BASE_DIR / name instead of using _safe_path, removing path\u2011sanitisation; traversal or invalid\u2011path handling behavior is new and probably not covered by tests.",
+          "confidence": 0.7,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/services/files.py",
+          "line": 32,
+          "severity": "high",
+          "message": "Removed call to _safe_path and directly concatenated user\u2011provided filename to BASE_DIR, enabling path traversal attacks (e.g., \"../../etc/passwd\"). This allows reading arbitrary files on the server.",
+          "confidence": 0.92,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/files.py",
+          "line": 7,
+          "severity": "medium",
+          "message": "Increased MAX_UPLOAD_BYTES from 10\u202fMB to 20\u202fMB; larger uploads are now allowed but existing tests likely only cover the previous 10\u202fMB limit, leaving the new size range untested.",
+          "confidence": 0.7,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_jwt_no_verify.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.9,
+      "tokens": 3270,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/api/auth.py",
+          "line": 33,
+          "severity": "high",
+          "message": "jwt.decode is called with options={\"verify_signature\": False}, which disables signature verification. This allows attackers to craft arbitrary JWTs and bypass authentication/authorization checks.",
+          "confidence": 0.95,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 19,
+          "severity": "medium",
+          "message": "TOKEN_TTL increased from 1 hour to 2 hours, extending JWT expiration. No tests appear to cover the new token lifetime, so expiration behavior may be unverified.",
+          "confidence": 0.73,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 33,
+          "severity": "high",
+          "message": "current_user_id now decodes JWT with verify_signature=False, disabling signature verification. This critical security change is not covered by tests, risking acceptance of forged tokens.",
+          "confidence": 0.81,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/api/auth.py",
+          "line": 33,
+          "severity": "high",
+          "message": "jwt.decode is called with options={\"verify_signature\": False}, which disables signature verification. This allows attackers to craft arbitrary JWTs and bypass authentication/authorization checks.",
+          "confidence": 0.95,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 19,
+          "severity": "medium",
+          "message": "TOKEN_TTL increased from 1 hour to 2 hours, extending JWT expiration. No tests appear to cover the new token lifetime, so expiration behavior may be unverified.",
+          "confidence": 0.73,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_timing_compare.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 3.1,
+      "tokens": 2725,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/api/auth.py",
+          "line": 45,
+          "severity": "medium",
+          "message": "Replaced constant\u2011time hmac.compare_digest with a direct string inequality, weakening password verification and exposing the system to timing attacks that can aid credential guessing.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/api/auth.py",
+          "line": 45,
+          "severity": "medium",
+          "message": "Replaced constant\u2011time hmac.compare_digest with a direct string inequality, weakening password verification and exposing the system to timing attacks that can aid credential guessing.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_yaml_load.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 4.4,
+      "tokens": 2966,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/utils/config_loader.py",
+          "line": 13,
+          "severity": "high",
+          "message": "Replaced yaml.safe_load with yaml.load using yaml.Loader, which allows execution of arbitrary Python objects during deserialization. If the YAML config file can be influenced by an attacker, this enables code execution. Use yaml.safe_load or a safe loader instead.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/utils/config_loader.py",
+          "line": 13,
+          "severity": "medium",
+          "message": "Changed yaml.safe_load to yaml.load with default Loader, altering how YAML is parsed and potentially constructing arbitrary Python objects; no tests added to verify the new parsing behavior.",
+          "confidence": 0.75,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/utils/config_loader.py",
+          "line": 13,
+          "severity": "high",
+          "message": "Replaced yaml.safe_load with yaml.load using yaml.Loader, which allows execution of arbitrary Python objects during deserialization. If the YAML config file can be influenced by an attacker, this enables code execution. Use yaml.safe_load or a safe loader instead.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_eval_coerce.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.4,
+      "tokens": 3322,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/utils/config_loader.py",
+          "line": 20,
+          "severity": "high",
+          "message": "The new _coerce function uses eval() on a string taken from an environment variable. If an attacker can influence the environment (e.g., via container injection, CI/CD, or misconfiguration), they could execute arbitrary Python code, leading to full compromise.",
+          "confidence": 0.95,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/utils/config_loader.py",
+          "line": 20,
+          "severity": "medium",
+          "message": "Using eval() to coerce environment variable strings can execute arbitrary code and may produce unexpected results; consider using ast.literal_eval or explicit parsing instead.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/utils/config_loader.py",
+          "line": 29,
+          "severity": "medium",
+          "message": "Environment variable overrides are now coerced to Python types via eval, but no tests cover this new coercion logic, risking incorrect config values.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/utils/config_loader.py",
+          "line": 20,
+          "severity": "high",
+          "message": "The new _coerce function uses eval() on a string taken from an environment variable. If an attacker can influence the environment (e.g., via container injection, CI/CD, or misconfiguration), they could execute arbitrary Python code, leading to full compromise.",
+          "confidence": 0.95,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/utils/config_loader.py",
+          "line": 29,
+          "severity": "medium",
+          "message": "Environment variable overrides are now coerced to Python types via eval, but no tests cover this new coercion logic, risking incorrect config values.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_tls_verify_off.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.2,
+      "tokens": 2984,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/api/main.py",
+          "line": 41,
+          "severity": "high",
+          "message": "TLS verification is disabled by passing verify=False to requests.get, allowing potential man\u2011in\u2011the\u2011middle attacks when contacting the external weather API.",
+          "confidence": 0.95,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/main.py",
+          "line": 36,
+          "severity": "low",
+          "message": "health() now returns an additional 'service' key, changing the response shape; no test appears to verify this new field",
+          "confidence": 0.7,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/main.py",
+          "line": 41,
+          "severity": "medium",
+          "message": "weather() disables SSL verification by adding verify=False to requests.get, altering request behavior; likely no test covers the impact of this change",
+          "confidence": 0.7,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/api/main.py",
+          "line": 41,
+          "severity": "high",
+          "message": "TLS verification is disabled by passing verify=False to requests.get, allowing potential man\u2011in\u2011the\u2011middle attacks when contacting the external weather API.",
+          "confidence": 0.95,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_page_offset.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.7,
+      "tokens": 3915,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/repositories/users.py",
+          "line": 49,
+          "severity": "medium",
+          "message": "The new `exists` method reveals whether a given email is present in the database, which can be used for user enumeration attacks if the method is exposed via an API endpoint.",
+          "confidence": 0.8,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 38,
+          "severity": "high",
+          "message": "The pagination offset is calculated as `page * size` even though the docstring says pages start at 1. This should be `(page - 1) * size`; the current logic will skip the first page and return incorrect results.",
+          "confidence": 0.95,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 38,
+          "severity": "medium",
+          "message": "Changed pagination offset calculation to 'page * size' instead of '(page - 1) * size', causing pages to start at the wrong record. No tests appear to cover this new behavior.",
+          "confidence": 0.73,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 49,
+          "severity": "low",
+          "message": "Added new 'exists' method to check for a user's email existence. No tests are present for this new functionality, so its correctness is unverified.",
+          "confidence": 0.71,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 38,
+          "severity": "high",
+          "message": "The pagination offset is calculated as `page * size` even though the docstring says pages start at 1. This should be `(page - 1) * size`; the current logic will skip the first page and return incorrect results.",
+          "confidence": 0.95,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "security",
+          "file": "app/repositories/users.py",
+          "line": 49,
+          "severity": "medium",
+          "message": "The new `exists` method reveals whether a given email is present in the database, which can be used for user enumeration attacks if the method is exposed via an API endpoint.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_append_mode.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.1,
+      "tokens": 3416,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/services/files.py",
+          "line": 26,
+          "severity": "high",
+          "message": "Changing file open mode from \"wb\" (write, truncating) to \"ab\" (append) allows repeated uploads of the same filename to bypass the MAX_UPLOAD_BYTES check, potentially leading to uncontrolled disk consumption (DoS).",
+          "confidence": 0.8,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 26,
+          "severity": "medium",
+          "message": "Changing the file open mode from \"wb\" (write, truncating) to \"ab\" (append) alters the function's behavior: repeated calls will now concatenate data instead of overwriting, which may lead to corrupted or duplicated files.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/files.py",
+          "line": 26,
+          "severity": "high",
+          "message": "Changing file open mode from \"wb\" to \"ab\" makes writes append instead of overwrite, potentially corrupting file contents; no tests added to verify this new behavior.",
+          "confidence": 0.75,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 26,
+          "severity": "medium",
+          "message": "Changing the file open mode from \"wb\" (write, truncating) to \"ab\" (append) alters the function's behavior: repeated calls will now concatenate data instead of overwriting, which may lead to corrupted or duplicated files.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_mutable_default.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.6,
+      "tokens": 3144,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 47,
+          "severity": "medium",
+          "message": "Uses a mutable default argument (extra: list[LineItem] = []). This will be shared across calls and can cause unexpected accumulation of items.",
+          "confidence": 0.96,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 48,
+          "severity": "low",
+          "message": "The function mutates the 'extra' list in place with extra.extend(items), which may be surprising to callers expecting a pure function.",
+          "confidence": 0.92,
+          "hit": "location_only"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 48,
+          "severity": "high",
+          "message": "The new function merge_items uses a mutable default argument (extra=[]). Calls will share the same list across invocations, causing items to be unintentionally accumulated and leading to incorrect invoice data. No tests are added to cover this behavior.",
+          "confidence": 0.75,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 48,
+          "severity": "high",
+          "message": "The new function merge_items uses a mutable default argument (extra=[]). Calls will share the same list across invocations, causing items to be unintentionally accumulated and leading to incorrect invoice data. No tests are added to cover this behavior.",
+          "confidence": 0.75,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 47,
+          "severity": "medium",
+          "message": "Uses a mutable default argument (extra: list[LineItem] = []). This will be shared across calls and can cause unexpected accumulation of items.",
+          "confidence": 0.96,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_discount_boundary.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.5,
+      "tokens": 2507,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 27,
+          "severity": "medium",
+          "message": "The condition `if amount > 100:` contradicts the docstring comment above which states \"Orders of 100 or more get the bulk discount.\" This off\u2011by\u2011one change could cause orders totaling exactly 100 to miss the discount, likely a bug.",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 27,
+          "severity": "medium",
+          "message": "Changed discount condition from >=100 to >100, so amount exactly 100 no longer gets discount. No test appears to cover this edge case, potentially causing incorrect billing for $100 orders.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 27,
+          "severity": "medium",
+          "message": "The condition `if amount > 100:` contradicts the docstring comment above which states \"Orders of 100 or more get the bulk discount.\" This off\u2011by\u2011one change could cause orders totaling exactly 100 to miss the discount, likely a bug.",
+          "confidence": 0.97,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_floor_division.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.0,
+      "tokens": 2769,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 41,
+          "severity": "medium",
+          "message": "Changed per_month calculation to use floor division (//) which drops fractional cents, potentially causing the sum of payments to not match the total amount. The original rounding to two decimals was more appropriate for monetary values.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 41,
+          "severity": "medium",
+          "message": "Changed per_month calculation to integer division (amount // months) which alters payment distribution and could produce incorrect payment amounts; no new tests added to verify this new behavior.",
+          "confidence": 0.75,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 41,
+          "severity": "medium",
+          "message": "Changed per_month calculation to use floor division (//) which drops fractional cents, potentially causing the sum of payments to not match the total amount. The original rounding to two decimals was more appropriate for monetary values.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_swallowed_error.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 5.7,
+      "tokens": 4233,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 47,
+          "severity": "high",
+          "message": "Swallowing all exceptions with a bare `pass` removes error logging and prevents the retry logic from functioning; the code now records success and returns even when `task()` fails, which is a serious logic regression.",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 48,
+          "severity": "high",
+          "message": "stats.record(ok=True) is now called after the retry loop regardless of task success, masking failures and leaving this new behavior untested",
+          "confidence": 0.85,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 47,
+          "severity": "high",
+          "message": "Swallowing all exceptions with a bare `pass` removes error logging and prevents the retry logic from functioning; the code now records success and returns even when `task()` fails, which is a serious logic regression.",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 48,
+          "severity": "high",
+          "message": "stats.record(ok=True) is now called after the retry loop regardless of task success, masking failures and leaving this new behavior untested",
+          "confidence": 0.85,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_missing_await.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.2,
+      "tokens": 3211,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 36,
+          "severity": "high",
+          "message": "Removed 'await' when calling async function fetch_status; now assigns coroutine object to 'status' causing logic errors (status will never be 'done'/'failed').",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 11,
+          "severity": "medium",
+          "message": "Increasing MAX_ATTEMPTS from 3 to 5 changes retry behavior but no tests appear to cover the higher attempt count, risking untested retry logic.",
+          "confidence": 0.78,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 36,
+          "severity": "high",
+          "message": "Removed 'await' when calling async fetch_status, causing a coroutine object to be used as status; this alters control flow and likely breaks wait_for_job, yet no tests cover this change.",
+          "confidence": 0.85,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 36,
+          "severity": "high",
+          "message": "Removed 'await' when calling async function fetch_status; now assigns coroutine object to 'status' causing logic errors (status will never be 'done'/'failed').",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 11,
+          "severity": "medium",
+          "message": "Increasing MAX_ATTEMPTS from 3 to 5 changes retry behavior but no tests appear to cover the higher attempt count, risking untested retry logic.",
+          "confidence": 0.78,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_inverted_override.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 8.7,
+      "tokens": 3523,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/utils/config_loader.py",
+          "line": 19,
+          "severity": "high",
+          "message": "The condition was inverted: it now checks `if env_value is None:` and then assigns `config[key] = env_value`, which overwrites existing config values with None when the environment variable is missing. This likely introduces bugs by unintentionally clearing config entries.",
+          "confidence": 0.95,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/utils/config_loader.py",
+          "line": 19,
+          "severity": "medium",
+          "message": "The condition for applying environment overrides was changed from checking for a non\u2011None value to checking for None, causing config values to be overwritten with None when the env var is unset. This new behavior is likely untested and can lead to incorrect configuration values.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/utils/config_loader.py",
+          "line": 19,
+          "severity": "high",
+          "message": "The condition was inverted: it now checks `if env_value is None:` and then assigns `config[key] = env_value`, which overwrites existing config values with None when the environment variable is missing. This likely introduces bugs by unintentionally clearing config entries.",
+          "confidence": 0.95,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "clean_get_many_in_clause.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.3,
+      "tokens": 3749,
+      "raw": [
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 23,
+          "severity": "medium",
+          "message": "get_many does not preserve duplicate IDs or order of input list; behavior for duplicate or missing IDs is untested",
+          "confidence": 0.73,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 23,
+          "severity": "medium",
+          "message": "get_many does not preserve duplicate IDs or order of input list; behavior for duplicate or missing IDs is untested",
+          "confidence": 0.73,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "clean_archive_exclude.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 7.2,
+      "tokens": 3925,
+      "raw": [],
+      "final": []
+    },
+    {
+      "case": "clean_literal_eval_coerce.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.4,
+      "tokens": 3796,
+      "raw": [
+        {
+          "reviewer": "tests",
+          "file": "app/utils/config_loader.py",
+          "line": 29,
+          "severity": "medium",
+          "message": "_apply_env_overrides now coerces environment variable strings to Python values via _coerce, changing config types; no tests verify this new coercion behavior.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "tests",
+          "file": "app/utils/config_loader.py",
+          "line": 29,
+          "severity": "medium",
+          "message": "_apply_env_overrides now coerces environment variable strings to Python values via _coerce, changing config types; no tests verify this new coercion behavior.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "clean_verify_password_helper.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.9,
+      "tokens": 3926,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "tests/test_auth.py",
+          "line": 3,
+          "severity": "low",
+          "message": "Test imports private function _verify_password; consider testing via the public API instead of internal helper.",
+          "confidence": 0.9,
+          "hit": "miss"
+        }
+      ],
+      "final": []
+    },
+    {
+      "case": "clean_extract_apply_tax.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.6,
+      "tokens": 3228,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "tests/test_billing.py",
+          "line": 1,
+          "severity": "low",
+          "message": "Test imports the internal helper function _apply_tax (prefixed with underscore), which is intended to be private; tests should exercise the public API instead of private implementation details.",
+          "confidence": 0.9,
+          "hit": "miss"
+        }
+      ],
+      "final": []
+    },
+    {
+      "case": "clean_stats_snapshot.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.1,
+      "tokens": 3096,
+      "raw": [
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 27,
+          "severity": "low",
+          "message": "snapshot() returns zero counts when no records have been made, but this case is not covered by tests",
+          "confidence": 0.7,
+          "hit": "miss"
+        }
+      ],
+      "final": []
+    },
+    {
+      "case": "clean_safe_path_relative_to.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.1,
+      "tokens": 3246,
+      "raw": [],
+      "final": []
+    }
+  ]
+}

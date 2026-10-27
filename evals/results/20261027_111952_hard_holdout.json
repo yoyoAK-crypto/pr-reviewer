@@ -1,0 +1,473 @@
+{
+  "note": "v3 final check",
+  "set": "hard",
+  "split": "holdout",
+  "metrics": {
+    "raw": {
+      "recall_strict_%": 66.7,
+      "recall_loose_%": 66.7,
+      "precision_strict_%": 26.3,
+      "precision_loose_%": 31.6,
+      "findings_per_clean_case": 1.33
+    },
+    "final": {
+      "recall_strict_%": 66.7,
+      "recall_loose_%": 66.7,
+      "precision_strict_%": 31.2,
+      "precision_loose_%": 31.2,
+      "findings_per_clean_case": 1.33
+    },
+    "final_recall_strict_by_category_%": {
+      "correctness": 66.7,
+      "security": 66.7
+    },
+    "clean_pass_rate_%": 0.0,
+    "total_tokens": 23788,
+    "avg_tokens_per_pr": 2643,
+    "avg_seconds_per_pr": 2.7,
+    "errors": 0
+  },
+  "cases": [
+    {
+      "case": "bug_shell_archive.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.9,
+      "tokens": 3093,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/services/files.py",
+          "line": 45,
+          "severity": "high",
+          "message": "Uses subprocess.run with shell=True and builds the command string via f-string from potentially untrusted inputs (dest, folder, compress). This enables command injection if an attacker can control these arguments.",
+          "confidence": 0.85,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 38,
+          "severity": "low",
+          "message": "Variable name 'flags' is vague; consider a more descriptive name like 'tar_options' to clarify its purpose.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 39,
+          "severity": "low",
+          "message": "Building a command string and executing it with shell=True can be error\u2011prone and harder to read; using a list argument to subprocess.run would be clearer and avoid shell parsing issues.",
+          "confidence": 0.85,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/files.py",
+          "line": 41,
+          "severity": "medium",
+          "message": "Added optional compress flag introduces a new branch (compress=False) that changes the tar command flags, but no tests appear to cover the non\u2011compressed path, risking untested behavior.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/services/files.py",
+          "line": 45,
+          "severity": "high",
+          "message": "Uses subprocess.run with shell=True and builds the command string via f-string from potentially untrusted inputs (dest, folder, compress). This enables command injection if an attacker can control these arguments.",
+          "confidence": 0.85,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/files.py",
+          "line": 41,
+          "severity": "medium",
+          "message": "Added optional compress flag introduces a new branch (compress=False) that changes the tar command flags, but no tests appear to cover the non\u2011compressed path, risking untested behavior.",
+          "confidence": 0.8,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 38,
+          "severity": "low",
+          "message": "Variable name 'flags' is vague; consider a more descriptive name like 'tar_options' to clarify its purpose.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 39,
+          "severity": "low",
+          "message": "Building a command string and executing it with shell=True can be error\u2011prone and harder to read; using a list argument to subprocess.run would be clearer and avoid shell parsing issues.",
+          "confidence": 0.85,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_log_password.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.2,
+      "tokens": 2726,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/api/auth.py",
+          "line": 45,
+          "severity": "high",
+          "message": "Logging the plaintext password in a warning log exposes sensitive credentials and may lead to credential leakage if logs are accessed.",
+          "confidence": 1.0,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 19,
+          "severity": "high",
+          "message": "TOKEN_TTL increased from 1 hour to 2 hours, changing token expiration behavior without accompanying test coverage",
+          "confidence": 0.75,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/api/auth.py",
+          "line": 45,
+          "severity": "high",
+          "message": "Logging the plaintext password in a warning log exposes sensitive credentials and may lead to credential leakage if logs are accessed.",
+          "confidence": 1.0,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 19,
+          "severity": "high",
+          "message": "TOKEN_TTL increased from 1 hour to 2 hours, changing token expiration behavior without accompanying test coverage",
+          "confidence": 0.75,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_cors_wildcard.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.4,
+      "tokens": 2520,
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/api/main.py",
+          "line": 15,
+          "severity": "high",
+          "message": "CORS policy changed to allow all origins (\"*\") while still allowing credentials, which can expose the API to cross\u2011origin attacks and credential leakage.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/api/main.py",
+          "line": 15,
+          "severity": "medium",
+          "message": "The CORS middleware's allow_origins is hard\u2011coded to [\"*\"] instead of using the configurable ALLOWED_ORIGINS variable, potentially overriding intended security settings and making the behavior less clear.",
+          "confidence": 0.95,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/api/main.py",
+          "line": 15,
+          "severity": "medium",
+          "message": "The CORS middleware's allow_origins is hard\u2011coded to [\"*\"] instead of using the configurable ALLOWED_ORIGINS variable, potentially overriding intended security settings and making the behavior less clear.",
+          "confidence": 0.95,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_soft_delete_column.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.6,
+      "tokens": 2737,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 45,
+          "severity": "high",
+          "message": "The soft\u2011delete implementation updates the row based on the email column but passes a user_id value, which is likely a bug and will either affect no rows or the wrong rows. The parameter name and query are mismatched, making the logic unclear and incorrect.",
+          "confidence": 0.95,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 45,
+          "severity": "high",
+          "message": "The delete method now performs a soft delete by updating the 'active' flag using the email column with a user_id value, changing behavior from hard delete. This new logic is likely untested and may cause incorrect rows to be marked inactive.",
+          "confidence": 0.75,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 45,
+          "severity": "high",
+          "message": "The soft\u2011delete implementation updates the row based on the email column but passes a user_id value, which is likely a bug and will either affect no rows or the wrong rows. The parameter name and query are mismatched, making the logic unclear and incorrect.",
+          "confidence": 0.95,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_round_precision.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.2,
+      "tokens": 2434,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 38,
+          "severity": "medium",
+          "message": "Rounding precision changed from 2 to 1 decimal place without explanation, which may introduce inaccurate totals and is likely unintended.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 33,
+          "severity": "high",
+          "message": "Changed rounding precision in total() from 2 to 1 decimal place, altering monetary calculation without accompanying test coverage.",
+          "confidence": 0.75,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 33,
+          "severity": "high",
+          "message": "Changed rounding precision in total() from 2 to 1 decimal place, altering monetary calculation without accompanying test coverage.",
+          "confidence": 0.75,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 38,
+          "severity": "medium",
+          "message": "Rounding precision changed from 2 to 1 decimal place without explanation, which may introduce inaccurate totals and is likely unintended.",
+          "confidence": 0.9,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "bug_counter_race.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 7.0,
+      "tokens": 2852,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 22,
+          "severity": "high",
+          "message": "Removed the thread\u2011safe lock around updates to `processed` and `failed`. In a concurrent environment this can cause race conditions and inaccurate statistics.",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 22,
+          "severity": "medium",
+          "message": "Increasing MAX_ATTEMPTS from 3 to 5 changes retry behavior but no tests appear to verify the new attempt limit, potentially allowing more retries than expected.",
+          "confidence": 0.78,
+          "hit": "location_only"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 24,
+          "severity": "high",
+          "message": "Removing the thread\u2011safety lock in JobStats.record changes how statistics are updated under concurrency; without tests for concurrent updates, race conditions could produce incorrect processed/failed counts.",
+          "confidence": 0.82,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 22,
+          "severity": "high",
+          "message": "Removed the thread\u2011safe lock around updates to `processed` and `failed`. In a concurrent environment this can cause race conditions and inaccurate statistics.",
+          "confidence": 0.97,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 24,
+          "severity": "high",
+          "message": "Removing the thread\u2011safety lock in JobStats.record changes how statistics are updated under concurrency; without tests for concurrent updates, race conditions could produce incorrect processed/failed counts.",
+          "confidence": 0.82,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "clean_request_timing_log.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.2,
+      "tokens": 2511,
+      "raw": [
+        {
+          "reviewer": "tests",
+          "file": "app/api/main.py",
+          "line": 28,
+          "severity": "low",
+          "message": "Added request timing logging (elapsed_ms) is not covered by tests, so the new log output format is untested.",
+          "confidence": 0.75,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "tests",
+          "file": "app/api/main.py",
+          "line": 28,
+          "severity": "low",
+          "message": "Added request timing logging (elapsed_ms) is not covered by tests, so the new log output format is untested.",
+          "confidence": 0.75,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "clean_users_docstrings.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.3,
+      "tokens": 2350,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 16,
+          "severity": "low",
+          "message": "Docstring for `search` claims case\u2011insensitive search, but the SQL uses `LIKE` which is case\u2011sensitive on most SQLite collations; the comment may mislead readers about behavior.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 52,
+          "severity": "low",
+          "message": "Docstring for `count` mentions \"including inactive ones\" but the query simply counts all rows; if the table has an `active` flag this docstring could be inaccurate and confusing.",
+          "confidence": 0.85,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 16,
+          "severity": "low",
+          "message": "Docstring for `search` claims case\u2011insensitive search, but the SQL uses `LIKE` which is case\u2011sensitive on most SQLite collations; the comment may mislead readers about behavior.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 52,
+          "severity": "low",
+          "message": "Docstring for `count` mentions \"including inactive ones\" but the query simply counts all rows; if the table has an `active` flag this docstring could be inaccurate and confusing.",
+          "confidence": 0.85,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "clean_installments_cap.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.2,
+      "tokens": 2565,
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 39,
+          "severity": "low",
+          "message": "The limit value 36 is a magic number; consider defining a named constant (e.g., MAX_INSTALLMENT_MONTHS) for clarity and easier future adjustments.",
+          "confidence": 0.95,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 39,
+          "severity": "low",
+          "message": "The limit value 36 is a magic number; consider defining a named constant (e.g., MAX_INSTALLMENT_MONTHS) for clarity and easier future adjustments.",
+          "confidence": 0.95,
+          "hit": "miss"
+        }
+      ]
+    }
+  ]
+}

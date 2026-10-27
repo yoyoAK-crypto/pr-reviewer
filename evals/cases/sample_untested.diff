@@ -1,0 +1,13 @@
+diff --git a/app/billing.py b/app/billing.py
+--- a/app/billing.py
++++ b/app/billing.py
+@@ -1,4 +1,10 @@
+ def apply_discount(total: float, code: str) -> float:
+-    return total
++    if code == "SAVE10":
++        return total * 0.9
++    if code == "HALF":
++        if total < 20:
++            raise ValueError("HALF needs a total of at least 20")
++        return total / 2
++    return total

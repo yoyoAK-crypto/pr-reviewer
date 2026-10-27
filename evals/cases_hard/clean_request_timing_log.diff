@@ -1,0 +1,24 @@
+--- a/app/api/main.py
++++ b/app/api/main.py
+@@ -1,5 +1,6 @@
+ import logging
+ import os
++import time
+ 
+ import requests
+ from fastapi import FastAPI, Request
+@@ -26,8 +27,13 @@
+ 
+ @app.middleware("http")
+ async def log_requests(request: Request, call_next):
++    start = time.perf_counter()
+     response = await call_next(request)
+-    logger.info("%s %s -> %d", request.method, request.url.path, response.status_code)
++    elapsed_ms = (time.perf_counter() - start) * 1000
++    logger.info(
++        "%s %s -> %d (%.1f ms)",
++        request.method, request.url.path, response.status_code, elapsed_ms,
++    )
+     return response
+ 
+ 

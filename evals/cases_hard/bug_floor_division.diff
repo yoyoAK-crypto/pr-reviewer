@@ -1,0 +1,19 @@
+--- a/app/services/billing.py
++++ b/app/services/billing.py
+@@ -1,6 +1,6 @@
+ from dataclasses import dataclass, field
+ 
+-TAX_RATE = 0.14
++TAX_RATE = 0.14  # Egyptian VAT
+ BULK_DISCOUNT = 0.10
+ 
+ 
+@@ -38,7 +38,7 @@
+     if months <= 0:
+         raise ValueError("months must be positive")
+     amount = total(invoice)
+-    per_month = round(amount / months, 2)
++    per_month = amount // months
+     payments = [per_month] * months
+     payments[-1] = round(amount - per_month * (months - 1), 2)
+     return payments

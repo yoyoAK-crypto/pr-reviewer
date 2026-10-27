@@ -1,0 +1,7 @@
+--- a/app/main.py
++++ b/app/main.py
+@@ -8,3 +8,3 @@ app = FastAPI()
+ @app.on_event("startup")
+ def startup():
+-    logger.info("Server starting")
++    logger.info("PR reviewer service starting")

@@ -1,0 +1,18 @@
+--- a/app/services/files.py
++++ b/app/services/files.py
+@@ -37,10 +37,13 @@
+     _safe_path(name).unlink(missing_ok=True)
+ 
+ 
+-def archive_folder(folder: str, dest: str) -> None:
++def archive_folder(folder: str, dest: str, compress: bool = True) -> None:
+     src = _safe_path(folder)
+-    subprocess.run(["tar", "-czf", dest, "-C", str(src.parent), src.name], check=True)
++    flags = "-czf" if compress else "-cf"
++    cmd = f"tar {flags} {dest} -C {src.parent} {src.name}"
++    subprocess.run(cmd, shell=True, check=True)
+ 
+ 
+ def disk_usage() -> int:
++    """Bytes used on the volume that holds uploads."""
+     return shutil.disk_usage(BASE_DIR).used

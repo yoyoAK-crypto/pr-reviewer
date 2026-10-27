@@ -1,0 +1,7 @@
+--- a/app/auth.py
++++ b/app/auth.py
+@@ -9,2 +9,3 @@ import sqlite3
+ def get_user(db, username):
+-    return db.execute("SELECT * FROM users WHERE name = ?", (username,))
++    query = f"SELECT * FROM users WHERE name = '{username}'"
++    return db.execute(query)

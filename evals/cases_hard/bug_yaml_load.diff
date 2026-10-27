@@ -1,0 +1,17 @@
+--- a/app/utils/config_loader.py
++++ b/app/utils/config_loader.py
+@@ -10,7 +10,7 @@
+ 
+ def _read_yaml(path: Path) -> dict:
+     with open(path, encoding="utf-8") as f:
+-        return yaml.safe_load(f) or {}
++        return yaml.load(f, Loader=yaml.Loader) or {}
+ 
+ 
+ def _apply_env_overrides(config: dict) -> dict:
+@@ -28,4 +28,5 @@
+ 
+ 
+ def get(key: str, default=None):
++    """Read one config value, falling back to default."""
+     return load_config().get(key, default)
