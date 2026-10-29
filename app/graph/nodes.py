@@ -53,6 +53,9 @@ def number_diff(diff: str) -> str:
             new_line = int(m.group(1))
             out.append(line)
             continue
+        # A new file starts: stop numbering until its first @@, so "index ..." and other headers stay as they are.
+        if line.startswith("diff --git"):
+            new_line = None
         # file headers and "\ No newline" markers stay as they are
         if new_line is None or line.startswith(("--- a/", "--- /dev/null", "+++ b/", "\\")):
             out.append(line)
