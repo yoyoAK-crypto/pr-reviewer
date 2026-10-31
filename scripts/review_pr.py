@@ -5,9 +5,8 @@ from pathlib import Path
 # Lets `python scripts/review_pr.py` find the app package, which lives one folder up.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.graph.build import build_graph
-from app.tools.github import (MAX_DIFF_CHARS, build_review, filter_diff, get_pr_diff,
-                              parse_pr_ref, post_review)
+from app.service import review_pull_request
+from app.tools.github import get_pr, parse_pr_ref
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -19,29 +18,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     owner, repo, number = parse_pr_ref(args.pr)
-    diff, skipped = filter_diff(get_pr_diff(owner, repo, number))
+    head_sha = get_pr(owner, repo, number)["head"]["sha"]
 
-    if skipped:
-        print(f"Skipped {len(skipped)} generated/binary files: {', '.join(skipped)}")
-    if not diff.strip():
-        sys.exit("Nothing to review after filtering.")
-    # Big PRs would blow past the token limit. Splitting them up is a week 4 job.
-    if len(diff) > MAX_DIFF_CHARS:
-        sys.exit(f"Diff is {len(diff):,} characters, over the {MAX_DIFF_CHARS:,} limit. Try a smaller PR.")
+    out = review_pull_request(owner, repo, number, head_sha, post=args.post)
+    if "result" not in out:
+        sys.exit(f"Not reviewed: {out['status']}")
 
-    pr_id = f"{owner}/{repo}#{number}"
-    result = build_graph().invoke({"pr_id": pr_id, "diff": diff, "findings": [], "tokens_used": 0})
-
-    print(f"\nReview for {pr_id}\n")
+    result = out["result"]
+    print(f"\nReview for {owner}/{repo}#{number} @ {head_sha[:7]}\n")
     print(result["final_review"])
     print(f"\nReviewers run: {result['plan']}")
     print(f"Raw findings: {len(result['findings'])}, tokens used: {result['tokens_used']}")
 
-    footer = f"Reviewers: {', '.join(result['plan'])} · {result['tokens_used']:,} tokens"
-    review = build_review(result["final_findings"], diff, footer)
-
     if args.post:
-        url = post_review(owner, repo, number, review)
-        print(f"\nPosted: {url}")
+        print(f"\nPosted: {out['url']}")
     else:
-        print(f"\nDry run: {len(review['comments'])} inline comment(s) ready. Add --post to publish.")
+        print(f"\nDry run: {len(out['review']['comments'])} inline comment(s) ready. Add --post to publish.")

@@ -1,3 +1,6 @@
+# doesn’t review the SHA, it labels with it. Each posted review gets tagged with the commit’s SHA. Before reviewing, the bot checks for 
+# that tag, and skips the commit if it’s already been reviewed.
+
 import os
 import re
 
@@ -41,18 +44,16 @@ def _headers(accept: str = "application/vnd.github+json") -> dict:
 def get_pr_diff(owner: str, repo: str, number: int) -> str:
     resp = httpx.get(
         f"{API}/repos/{owner}/{repo}/pulls/{number}",
-        # Allows us to extract a raw diff file, not a JSON. 
         headers=_headers("application/vnd.github.diff"),
         timeout=30,
-        # It follows redirects (follow_redirects=True), for example when a repo has been renamed.
         follow_redirects=True,
     )
     resp.raise_for_status()
     return resp.text
 
 
-# Drops generated/binary files from a GitHub diff e.g, lock files, minified JS and images. Returns (kept_diff, skipped_paths).  
-# filter_diff splits the diff into files at each diff --git line and drops generated or binary files:
+# Drops generated/binary files from a GitHub diff. Returns (kept_diff, skipped_paths).
+# GitHub diffs start each file with a "diff --git a/path b/path" line.
 def filter_diff(diff: str) -> tuple[str, list[str]]:
     kept, skipped = [], []
     for chunk in re.split(r"(?m)^(?=diff --git )", diff):
@@ -67,12 +68,28 @@ def filter_diff(diff: str) -> tuple[str, list[str]]:
     return "".join(kept), skipped
 
 
+# Asks GitHub for the PR’s details. The review script uses it to find the PR’s latest commit SHA
+def get_pr(owner: str, repo: str, number: int) -> dict:
+    resp = httpx.get(f"{API}/repos/{owner}/{repo}/pulls/{number}", headers=_headers(), timeout=30)
+    resp.raise_for_status()
+    return resp.json()
+
+
+# Lists every review on the PR and checks whether any contains the tag for this exact commit
+def already_reviewed(owner: str, repo: str, number: int, head_sha: str) -> bool:
+    resp = httpx.get(f"{API}/repos/{owner}/{repo}/pulls/{number}/reviews",
+                     headers=_headers(), params={"per_page": 100}, timeout=30)
+    resp.raise_for_status()
+    tag = BOT_MARKER.format(sha=head_sha)
+    return any(tag in (r.get("body") or "") for r in resp.json())
+
+
 # ---------- Posting reviews ----------
 
 HUNK = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
 
-# Hidden tag in every review body, so later we can recognise (and skip or update) our own reviews.
-BOT_MARKER = "<!-- pr-reviewer -->"
+# It now records which commit was reviewed. That's what already_reviewed looks for.
+BOT_MARKER = "<!-- pr-reviewer sha={sha} -->"
 
 
 # GitHub only accepts inline comments on lines that appear in the diff.
@@ -103,8 +120,7 @@ def _format_finding(f) -> str:
 
 # Builds the request body for GitHub's "create a review" endpoint.
 # Findings on lines GitHub can attach to become inline comments; the rest go in the summary.
-# Findings on a commentable line become inline comments, which appear next to the code. Others are listed in the summary instead of being lost
-def build_review(findings, diff: str, footer: str = "") -> dict:
+def build_review(findings, diff: str, head_sha: str, footer: str = "") -> dict:
     allowed = commentable_lines(diff)
     inline, leftover = [], []
     for f in findings:
@@ -122,10 +138,11 @@ def build_review(findings, diff: str, footer: str = "") -> dict:
             f"- `{f.file}:{f.line}` **{f.severity.upper()}** · {f.reviewer}: {f.message}" for f in leftover)
     if footer:
         body += f"\n\n<sub>{footer}</sub>"
-    body += f"\n{BOT_MARKER}"
+    body += "\n" + BOT_MARKER.format(sha=head_sha)
 
     # "COMMENT" only. The bot never approves or blocks a PR; a human decides.
-    return {"event": "COMMENT", "body": body, "comments": inline}
+    # commit_id pins the comments to the commit that was reviewed, even if new pushes land meanwhile.
+    return {"event": "COMMENT", "body": body, "comments": inline, "commit_id": head_sha}
 
 
 # Posts the review to the PR and returns its URL.
