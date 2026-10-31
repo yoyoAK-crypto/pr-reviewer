@@ -83,7 +83,10 @@ def run_reviewer(name: str, diff: str) -> tuple[list[Finding], int]:
             {"role": "system", "content": system},
             {"role": "user", "content": number_diff(diff)},
         ],
-        response_format={"type": "json_object"},
+        response_format={
+            "type": "json_schema",
+            "json_schema": {"name": "findings", "strict": True, "schema": FINDINGS_SCHEMA},
+        },
     )
 
     # gpt-oss is a reasoning model: if it uses the whole token budget thinking,
