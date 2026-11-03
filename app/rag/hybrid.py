@@ -30,13 +30,20 @@ class HybridIndex:
         self.keyword = BM25Index(chunks)
         self.vector = VectorIndex(chunks, embedder or Embedder())
 
+    # Every chunk that made either method's top-n, fused with RRF (so up to 2n chunks).
+    # This is the "shortlist" a reranker re-sorts: a chunk that is 1st in one list and absent
+    # from the other is still on it, even if RRF alone would rank it low.
+    def candidates(self, query: str, n: int = 20,
+                   exclude_ids: set[str] = frozenset()) -> list[tuple[Chunk, float]]:
+        kw = [c for c, _ in self.keyword.search(query, n, exclude_ids)]
+        vec = [c for c, _ in self.vector.search(query, n, exclude_ids)]
+        return rrf([kw, vec])
+
     # Each search method fetches a deeper list (candidates) than we finally return (k),
     # so a chunk that is only 8th in one list can still rise if it is strong in the other.
     def search(self, query: str, k: int = 5, candidates: int = 20,
                exclude_ids: set[str] = frozenset()) -> list[tuple[Chunk, float]]:
-        kw = [c for c, _ in self.keyword.search(query, candidates, exclude_ids)]
-        vec = [c for c, _ in self.vector.search(query, candidates, exclude_ids)]
-        return rrf([kw, vec])[:k]
+        return self.candidates(query, candidates, exclude_ids)[:k]
 
 
 # Try it, and compare the three rankings side by side:

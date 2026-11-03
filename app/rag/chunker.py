@@ -41,6 +41,11 @@ def _called_names(node: ast.AST) -> list[str]:
 def _source(lines: list[str], node: ast.AST) -> tuple[int, int, str]:
     # Include decorators (@router.post(...)) so the chunk shows how the function is used.
     start = min([node.lineno] + [d.lineno for d in getattr(node, "decorator_list", [])])
+    # Include the comment block written directly above the function: it usually explains
+    # what the function does, which is exactly what search needs to match on.
+    # Without this, those comments land in the file's <module> chunk instead.
+    while start > 1 and lines[start - 2].strip().startswith("#"):
+        start -= 1
     end = node.end_lineno
     return start, end, "\n".join(lines[start - 1:end])
 
