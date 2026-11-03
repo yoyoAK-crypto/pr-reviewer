@@ -1,8 +1,11 @@
 # doesn’t review the SHA, it labels with it. Each posted review gets tagged with the commit’s SHA. Before reviewing, the bot checks for 
 # that tag, and skips the commit if it’s already been reviewed.
 
+import io
 import os
 import re
+import tarfile
+from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
@@ -66,6 +69,31 @@ def filter_diff(diff: str) -> tuple[str, list[str]]:
         else:
             kept.append(chunk)
     return "".join(kept), skipped
+
+
+# Downloads the repo's Python files at one commit, so retrieval can search them.
+# Uses GitHub's tarball endpoint (one compressed archive, no git needed) and keeps only .py files.
+# Cached per commit: a second review of the same commit doesn't download again.
+def download_repo(owner: str, repo: str, sha: str, cache_dir: Path = Path(".rag_cache/repos")) -> Path:
+    dest = cache_dir / f"{owner}__{repo}@{sha[:12]}"
+    if dest.exists():
+        return dest
+    resp = httpx.get(f"{API}/repos/{owner}/{repo}/tarball/{sha}", headers=_headers(),
+                     timeout=60, follow_redirects=True)
+    resp.raise_for_status()
+    tmp = dest.with_name(dest.name + ".partial")
+    with tarfile.open(fileobj=io.BytesIO(resp.content), mode="r:gz") as tar:
+        members = []
+        for m in tar.getmembers():
+            parts = m.name.split("/", 1)            # GitHub wraps everything in one top folder; drop it
+            if len(parts) != 2 or ".." in Path(parts[1]).parts or parts[1].startswith("/"):
+                continue                            # skip anything trying to escape the folder
+            if m.isfile() and parts[1].endswith(".py"):
+                m.name = parts[1]
+                members.append(m)
+        tar.extractall(tmp, members=members, filter="data")   # "data" blocks ../ and absolute paths
+    tmp.rename(dest)
+    return dest
 
 
 # Asks GitHub for the PR’s details. The review script uses it to find the PR’s latest commit SHA

@@ -24,6 +24,9 @@ class ReviewState(TypedDict):
     diff: str                                      # contains the lines that were added (+), the lines that were removed (-) and a few unchanged lines around them for context.
     changed_files: list[str]                       # parsed from the diff, used by the planner.
     plan: list[str]                                # reviewers the planner chose to run. Needs system prompt
+    repo_root: str | None                          # folder with the repo's code at this commit; None = no retrieval
+    context: str                                   # related code found by retrieval, shown to every reviewer
+    context_ids: list[str]                         # which chunks were used, for debugging and evals
 
     # Annotated[..., operator.add] tells LangGraph to merging lists instead of overwriting.
     # Three reviewers running in parallel each return {"findings": [...]},

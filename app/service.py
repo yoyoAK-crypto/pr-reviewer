@@ -3,8 +3,9 @@
 import logging
 
 from app.graph.build import build_graph
-from app.tools.github import (MAX_DIFF_CHARS, already_reviewed, build_review, filter_diff,
-                              get_pr_diff, post_review)
+from app.tools.github import (MAX_DIFF_CHARS, already_reviewed, build_review, download_repo,
+                              filter_diff, get_pr_diff, post_review)
+from app.tools.retrieval import MODE as RETRIEVAL_MODE
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,16 @@ def review_pull_request(owner: str, repo: str, number: int, head_sha: str, post:
         logger.warning("%s: diff is %d chars, over the limit", pr_id, len(diff))
         return {"status": "skipped_too_large", "chars": len(diff)}
 
-    result = graph.invoke({"pr_id": pr_id, "diff": diff, "findings": [], "tokens_used": 0})
+    # Retrieval needs the repo's code at this commit. If the download fails, review without it.
+    repo_root = None
+    if RETRIEVAL_MODE != "off":
+        try:
+            repo_root = str(download_repo(owner, repo, head_sha))
+        except Exception:
+            logger.exception("%s: could not download repo, reviewing without context", pr_id)
+
+    result = graph.invoke({"pr_id": pr_id, "diff": diff, "repo_root": repo_root,
+                           "findings": [], "tokens_used": 0})
     footer = f"Reviewers: {', '.join(result['plan'])} · {result['tokens_used']:,} tokens · commit {head_sha[:7]}"
     review = build_review(result["final_findings"], diff, head_sha, footer)
 

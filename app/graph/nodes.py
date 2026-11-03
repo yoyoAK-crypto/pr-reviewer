@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from langgraph.types import Send
 
 from app.graph.state import ReviewState, Finding
+from app.tools.retrieval import build_context
 
 load_dotenv()
 client = Groq(max_retries=6)  # waits and retries on 429 instead of failing
@@ -72,8 +73,13 @@ def number_diff(diff: str) -> str:
 
 # Runs one reviewer (security, style or tests) on a diff.
 # Returns the valid findings and how many tokens the call used.
-def run_reviewer(name: str, diff: str) -> tuple[list[Finding], int]:
+def run_reviewer(name: str, diff: str, context: str = "") -> tuple[list[Finding], int]:
     system = (PROMPTS / f"{name}.txt").read_text(encoding="utf-8")
+
+    # With retrieval on, the related code comes first, clearly separated from the diff to review.
+    user = number_diff(diff)
+    if context:
+        user = f"RELATED CODE (for understanding only, do not review it):\n\n{context}\n\nDIFF TO REVIEW:\n{user}"
 
     resp = client.chat.completions.create(
         model="openai/gpt-oss-120b",  # check console.groq.com/docs/models for current IDs
@@ -81,7 +87,7 @@ def run_reviewer(name: str, diff: str) -> tuple[list[Finding], int]:
         temperature=0,  # same input gives (nearly) the same output, so eval scores are comparable
         messages=[
             {"role": "system", "content": system},
-            {"role": "user", "content": number_diff(diff)},
+            {"role": "user", "content": user},
         ],
         response_format={
             "type": "json_schema",
@@ -128,16 +134,24 @@ def planner(state: ReviewState) -> dict:
     return {"changed_files": files, "plan": plan}
 
 
-# Called by LangGraph after the planner. Returns one Send per reviewer,
+# Finds code from the rest of the repo that relates to the diff (week 3).
+# Runs once per review; every reviewer then gets the same context.
+def retrieve(state: ReviewState) -> dict:
+    context, ids = build_context(state["diff"], state.get("repo_root"))
+    return {"context": context, "context_ids": ids}
+
+
+# Called by LangGraph after retrieval. Returns one Send per reviewer,
 # which tells LangGraph to run the "reviewer" node once for each, in parallel.
 def fan_out(state: ReviewState) -> list[Send]:
-    return [Send("reviewer", {"name": name, "diff": state["diff"]}) for name in state["plan"]]
+    return [Send("reviewer", {"name": name, "diff": state["diff"], "context": state.get("context", "")})
+            for name in state["plan"]]
 
 
 # One reviewer run. Receives the small dict from Send, not the full state.
 # Returns findings and tokens; operator.add in ReviewState merges them across parallel runs.
 def reviewer(payload: dict) -> dict:
-    findings, tokens = run_reviewer(payload["name"], payload["diff"])
+    findings, tokens = run_reviewer(payload["name"], payload["diff"], payload.get("context", ""))
     return {"findings": findings, "tokens_used": tokens}
 
 
