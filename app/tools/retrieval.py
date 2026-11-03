@@ -3,10 +3,16 @@ import os
 import re
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from app.rag.chunker import Chunk, chunk_repo
 from app.rag.keyword import BM25Index, diff_to_query
 
 logger = logging.getLogger(__name__)
+
+# Load .env here, because MODE is read the moment this file is imported, which can happen
+# before any other file has loaded .env. Without this, RETRIEVAL_MODE silently stays "off".
+load_dotenv()
 
 # Which search the reviewers get context from. Set in .env:
 #   off     - no context, diff only (the behaviour before week 3)

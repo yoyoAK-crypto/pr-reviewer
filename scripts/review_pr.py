@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.service import review_pull_request
 from app.tools.github import get_pr, parse_pr_ref
+from app.tools.retrieval import MODE as RETRIEVAL_MODE
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -29,6 +30,11 @@ if __name__ == "__main__":
     print(result["final_review"])
     print(f"\nReviewers run: {result['plan']}")
     print(f"Raw findings: {len(result['findings'])}, tokens used: {result['tokens_used']}")
+    # Shows whether retrieval ran and which chunks the reviewers were given.
+    ids = result.get("context_ids") or []
+    print(f"Retrieval: {RETRIEVAL_MODE}, {len(ids)} chunk(s), {len(result.get('context') or ''):,} chars")
+    for cid in ids:
+        print(f"  - {cid}")
 
     if args.post:
         print(f"\nPosted: {out['url']}")
