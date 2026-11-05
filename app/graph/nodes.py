@@ -8,6 +8,7 @@ from langgraph.types import Send
 
 from app.graph.state import ReviewState, Finding
 from app.tools.retrieval import build_context
+from app.guardrails.redact import redact, secrets_added
 
 load_dotenv()
 client = Groq(max_retries=6)  # waits and retries on 429 instead of failing
@@ -120,6 +121,18 @@ def run_reviewer(name: str, diff: str, context: str = "") -> tuple[list[Finding]
 
 
 
+# First node: scrubs secrets from the diff so they never reach the model (week 4).
+# Each secret on an ADDED line also becomes a finding directly: a regex is certain,
+# so there is no need to hope a reviewer notices it.
+def guard(state: ReviewState) -> dict:
+    diff, _ = redact(state["diff"])
+    findings = [Finding(reviewer="guardrail", file=path, line=line, severity="high", confidence=1.0,
+                        message=f"Hardcoded secret ({kind}) added in code. Remove it, rotate it, "
+                                "and load it from an environment variable or a secrets manager.")
+                for path, line, kind in secrets_added(diff)]
+    return {"diff": diff, "findings": findings}
+
+
 # Decides which reviewers to run, based on simple rules (no LLM yet).
 def planner(state: ReviewState) -> dict:
     # Lines like "+++ b/app/auth.py" name the changed files; [6:] cuts off "+++ b/".
@@ -138,6 +151,7 @@ def planner(state: ReviewState) -> dict:
 # Runs once per review; every reviewer then gets the same context.
 def retrieve(state: ReviewState) -> dict:
     context, ids = build_context(state["diff"], state.get("repo_root"))
+    context, _ = redact(context)   # retrieved code can contain secrets too
     return {"context": context, "context_ids": ids}
 
 

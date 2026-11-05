@@ -6,6 +6,7 @@ from app.graph.build import build_graph
 from app.tools.github import (MAX_DIFF_CHARS, already_reviewed, build_review, download_repo,
                               filter_diff, get_pr_diff, post_review)
 from app.tools.retrieval import MODE as RETRIEVAL_MODE
+from app.guardrails.redact import redact
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,13 @@ def review_pull_request(owner: str, repo: str, number: int, head_sha: str, post:
         except Exception:
             logger.exception("%s: could not download repo, reviewing without context", pr_id)
 
-    result = graph.invoke({"pr_id": pr_id, "diff": diff, "repo_root": repo_root,
+    # Redact before the graph too: the graph's input is what LangSmith records in traces.
+    # (The guard node redacts again, harmlessly, and turns the markers into findings.)
+    safe_diff, secrets = redact(diff)
+    if secrets:
+        logger.warning("%s: redacted %d secret(s): %s", pr_id, len(secrets), sorted({s.kind for s in secrets}))
+
+    result = graph.invoke({"pr_id": pr_id, "diff": safe_diff, "repo_root": repo_root,
                            "findings": [], "tokens_used": 0})
     footer = f"Reviewers: {', '.join(result['plan'])} · {result['tokens_used']:,} tokens · commit {head_sha[:7]}"
     review = build_review(result["final_findings"], diff, head_sha, footer)
