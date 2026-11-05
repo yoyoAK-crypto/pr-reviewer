@@ -1,0 +1,15 @@
+--- a/app/services/billing.py
++++ b/app/services/billing.py
+@@ -28,10 +28,10 @@
+     return 0.0
+ 
+ 
+-def total(invoice: Invoice) -> float:
++def total(invoice: Invoice) -> str:
+     amount = subtotal(invoice)
+     amount -= discount(amount)
+-    return round(amount * (1 + TAX_RATE), 2)
++    return f"{amount * (1 + TAX_RATE):.2f}"
+ 
+ 
+ def installments(invoice: Invoice, months: int) -> list[float]:

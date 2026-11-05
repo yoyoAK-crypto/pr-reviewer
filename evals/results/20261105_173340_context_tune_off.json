@@ -1,0 +1,600 @@
+{
+  "note": "ctx off",
+  "set": "context",
+  "split": "tune",
+  "retrieval": "off",
+  "metrics": {
+    "raw": {
+      "recall_strict_%": 87.5,
+      "recall_loose_%": 100.0,
+      "precision_strict_%": 48.0,
+      "precision_loose_%": 60.0,
+      "findings_per_clean_case": 1.17
+    },
+    "final": {
+      "recall_strict_%": 87.5,
+      "recall_loose_%": 100.0,
+      "precision_strict_%": 46.7,
+      "precision_loose_%": 60.0,
+      "findings_per_clean_case": 0.5
+    },
+    "final_recall_strict_by_category_%": {
+      "cross_file": 87.5
+    },
+    "clean_pass_rate_%": 50.0,
+    "retrieval": "off",
+    "avg_context_chars": 0,
+    "retrieval_found_broken_caller_%": 0.0,
+    "total_tokens": 48467,
+    "avg_tokens_per_pr": 3462,
+    "avg_seconds_per_pr": 3.8,
+    "errors": 0
+  },
+  "cases": [
+    {
+      "case": "ctx_get_by_id_returns_dict.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.8,
+      "tokens": 3661,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 16,
+          "severity": "medium",
+          "message": "The method signature now returns dict | None instead of a User object, which is inconsistent with the method name and other repository methods; this can mislead callers and cause type\u2011related bugs.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 20,
+          "severity": "low",
+          "message": "Using dict(zip((\"id\",\"name\",\"email\"), row)) is less explicit than a literal dict and reduces readability; consider returning a dict literal for clarity.",
+          "confidence": 0.8,
+          "hit": "location_only"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 20,
+          "severity": "medium",
+          "message": "The get_by_id method now returns a dict instead of a User object, altering its return type and behavior, but no tests appear to cover this change.",
+          "confidence": 0.75,
+          "hit": "location_only"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 16,
+          "severity": "medium",
+          "message": "The method signature now returns dict | None instead of a User object, which is inconsistent with the method name and other repository methods; this can mislead callers and cause type\u2011related bugs.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 20,
+          "severity": "medium",
+          "message": "The get_by_id method now returns a dict instead of a User object, altering its return type and behavior, but no tests appear to cover this change.",
+          "confidence": 0.75,
+          "hit": "location_only"
+        }
+      ]
+    },
+    {
+      "case": "ctx_total_returns_string.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.2,
+      "tokens": 3605,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 31,
+          "severity": "medium",
+          "message": "Changing the return type annotation from float to str alters the function contract; callers expecting a numeric total may now receive a string, leading to type errors or subtle bugs.",
+          "confidence": 0.95,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 34,
+          "severity": "medium",
+          "message": "Returning a formatted string instead of a numeric value can cause downstream code that performs arithmetic on the total to fail or behave incorrectly.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 34,
+          "severity": "high",
+          "message": "The total() function now returns a formatted string instead of a float, changing its type and rounding behavior, but no tests cover this new behavior.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 31,
+          "severity": "medium",
+          "message": "Changing the return type annotation from float to str alters the function contract; callers expecting a numeric total may now receive a string, leading to type errors or subtle bugs.",
+          "confidence": 0.95,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 34,
+          "severity": "medium",
+          "message": "Returning a formatted string instead of a numeric value can cause downstream code that performs arithmetic on the total to fail or behave incorrectly.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "ctx_installments_returns_dict.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.5,
+      "tokens": 3636,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 37,
+          "severity": "medium",
+          "message": "Changing the return type from list[float] to dict[int, float] may break existing callers that expect a list (e.g., indexing or iteration semantics). Ensure all usages are updated accordingly.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 44,
+          "severity": "medium",
+          "message": "installments now returns a dict mapping month numbers to amounts, changing its return type and behavior, but no tests cover this new dict output, risking incorrect usage or failures in callers expecting a list",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 37,
+          "severity": "medium",
+          "message": "Changing the return type from list[float] to dict[int, float] may break existing callers that expect a list (e.g., indexing or iteration semantics). Ensure all usages are updated accordingly.",
+          "confidence": 0.9,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 44,
+          "severity": "medium",
+          "message": "installments now returns a dict mapping month numbers to amounts, changing its return type and behavior, but no tests cover this new dict output, risking incorrect usage or failures in callers expecting a list",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "ctx_read_file_returns_str.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.6,
+      "tokens": 3401,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 30,
+          "severity": "medium",
+          "message": "Changing the return type of read_file from bytes to str may break callers that expect a bytes object, introducing runtime errors.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/files.py",
+          "line": 30,
+          "severity": "medium",
+          "message": "Changing read_file to open files in text mode and return a string instead of bytes alters its behavior; existing callers expecting bytes may break, and no tests appear to cover this new return type.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/services/files.py",
+          "line": 30,
+          "severity": "medium",
+          "message": "Changing the return type of read_file from bytes to str may break callers that expect a bytes object, introducing runtime errors.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "ctx_list_page_zero_based.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.5,
+      "tokens": 3327,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 37,
+          "severity": "medium",
+          "message": "Changing pagination to 0\u2011based (offset = page * size) and updating the docstring may break callers that expect the original 1\u2011based page indexing. Verify that the rest of the codebase and API contract are updated accordingly, otherwise this off\u2011by\u2011one shift can cause missing or duplicated results.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 38,
+          "severity": "medium",
+          "message": "Switching pagination to zero\u2011based offset (offset = page * size) changes paging behavior and can cause off\u2011by\u2011one errors; no tests added to verify the new page indexing.",
+          "confidence": 0.8,
+          "hit": "location_only"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/repositories/users.py",
+          "line": 37,
+          "severity": "medium",
+          "message": "Changing pagination to 0\u2011based (offset = page * size) and updating the docstring may break callers that expect the original 1\u2011based page indexing. Verify that the rest of the codebase and API contract are updated accordingly, otherwise this off\u2011by\u2011one shift can cause missing or duplicated results.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/repositories/users.py",
+          "line": 38,
+          "severity": "medium",
+          "message": "Switching pagination to zero\u2011based offset (offset = page * size) changes paging behavior and can cause off\u2011by\u2011one errors; no tests added to verify the new page indexing.",
+          "confidence": 0.8,
+          "hit": "location_only"
+        }
+      ]
+    },
+    {
+      "case": "ctx_config_get_no_default.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.4,
+      "tokens": 3356,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/utils/config_loader.py",
+          "line": 30,
+          "severity": "medium",
+          "message": "Removed the optional 'default' parameter from get(), changing its signature and potentially breaking callers that relied on providing a default value; such calls will now raise a TypeError or KeyError.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/utils/config_loader.py",
+          "line": 30,
+          "severity": "medium",
+          "message": "The new get(key) function no longer accepts a default and will raise a KeyError for missing configuration keys. This changed behavior is not covered by tests, so missing keys could cause uncaught exceptions.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/utils/config_loader.py",
+          "line": 30,
+          "severity": "medium",
+          "message": "Removed the optional 'default' parameter from get(), changing its signature and potentially breaking callers that relied on providing a default value; such calls will now raise a TypeError or KeyError.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "ctx_record_renamed.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.4,
+      "tokens": 3672,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 20,
+          "severity": "medium",
+          "message": "Method renamed from 'record' to 'record_result' without updating all call sites; other parts of the codebase may still invoke 'record', leading to AttributeError at runtime.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 20,
+          "severity": "high",
+          "message": "Method renamed from record to record_result; external callers still using record will raise AttributeError, and no tests cover this breaking change.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/workers/jobs.py",
+          "line": 20,
+          "severity": "medium",
+          "message": "Method renamed from 'record' to 'record_result' without updating all call sites; other parts of the codebase may still invoke 'record', leading to AttributeError at runtime.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "ctx_create_token_required_arg.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 8.5,
+      "tokens": 4208,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/api/auth.py",
+          "line": 26,
+          "severity": "medium",
+          "message": "The new 'scopes' parameter in create_token has no default value, so existing calls to create_token without providing scopes will raise a TypeError, potentially breaking authentication flow.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 26,
+          "severity": "medium",
+          "message": "The create_token function signature was changed to require a 'scopes' argument and the token now includes a 'scopes' claim. Calls to create_token elsewhere that still pass only user_id will raise a TypeError, and the new scopes claim is not covered by existing tests, potentially leading to incorrect authorization behavior.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/api/auth.py",
+          "line": 26,
+          "severity": "medium",
+          "message": "The new 'scopes' parameter in create_token has no default value, so existing calls to create_token without providing scopes will raise a TypeError, potentially breaking authentication flow.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "ctx_clean_get_by_id_docstring.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 0.9,
+      "tokens": 2794,
+      "context_ids": [],
+      "raw": [],
+      "final": []
+    },
+    {
+      "case": "ctx_clean_total_helper.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.4,
+      "tokens": 3242,
+      "context_ids": [],
+      "raw": [],
+      "final": []
+    },
+    {
+      "case": "ctx_clean_installments_cap.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.2,
+      "tokens": 3001,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/services/billing.py",
+          "line": 40,
+          "severity": "low",
+          "message": "Magic number 36 used directly in validation; consider defining a named constant for the maximum allowed months to improve readability and maintainability.",
+          "confidence": 0.95,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 40,
+          "severity": "medium",
+          "message": "Added validation that raises ValueError when months > 36 is not covered by tests, potentially allowing uncaught errors for large installment plans.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "tests",
+          "file": "app/services/billing.py",
+          "line": 40,
+          "severity": "medium",
+          "message": "Added validation that raises ValueError when months > 36 is not covered by tests, potentially allowing uncaught errors for large installment plans.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "ctx_clean_config_get_cast.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.5,
+      "tokens": 3442,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "style",
+          "file": "app/utils/config_loader.py",
+          "line": 30,
+          "severity": "low",
+          "message": "The new `cast` argument is applied to the `default` value when the key is missing, which may unintentionally cast a fallback value; consider handling defaults separately or documenting this behavior.",
+          "confidence": 0.7,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/utils/config_loader.py",
+          "line": 33,
+          "severity": "medium",
+          "message": "The new optional 'cast' argument adds a branch that casts config values, potentially raising errors or changing types, but no tests cover this behavior.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "tests",
+          "file": "app/utils/config_loader.py",
+          "line": 33,
+          "severity": "medium",
+          "message": "The new optional 'cast' argument adds a branch that casts config values, potentially raising errors or changing types, but no tests cover this behavior.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ]
+    },
+    {
+      "case": "ctx_clean_record_alias.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.3,
+      "tokens": 3229,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "tests",
+          "file": "app/workers/jobs.py",
+          "line": 28,
+          "severity": "low",
+          "message": "Added record_many method introduces new behavior (batch recording) that is not covered by tests, potentially allowing untested handling of result lists.",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ],
+      "final": []
+    },
+    {
+      "case": "ctx_clean_create_token_optional_arg.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.9,
+      "tokens": 3893,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/api/auth.py",
+          "line": 28,
+          "severity": "high",
+          "message": "The new `scopes` parameter is incorporated directly into the JWT claims without any validation or sanitization. If `create_token` can be called with user\u2011controlled input, an attacker could inject arbitrary scopes and potentially elevate privileges when the token is later used for authorization checks.",
+          "confidence": 0.7,
+          "hit": "miss"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 28,
+          "severity": "medium",
+          "message": "create_token now adds a \"scopes\" claim to the JWT payload, but no tests verify that the claim is correctly included or handled downstream",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "tests",
+          "file": "app/api/auth.py",
+          "line": 28,
+          "severity": "medium",
+          "message": "create_token now adds a \"scopes\" claim to the JWT payload, but no tests verify that the claim is correctly included or handled downstream",
+          "confidence": 0.8,
+          "hit": "miss"
+        }
+      ]
+    }
+  ]
+}

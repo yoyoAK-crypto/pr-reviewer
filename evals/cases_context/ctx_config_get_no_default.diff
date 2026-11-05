@@ -1,0 +1,11 @@
+--- a/app/utils/config_loader.py
++++ b/app/utils/config_loader.py
+@@ -27,5 +27,6 @@
+     return _apply_env_overrides(config)
+ 
+ 
+-def get(key: str, default=None):
+-    return load_config().get(key, default)
++def get(key: str):
++    """Read a required config value; missing keys are an error."""
++    return load_config()[key]

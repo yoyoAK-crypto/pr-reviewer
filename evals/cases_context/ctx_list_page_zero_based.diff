@@ -1,0 +1,13 @@
+--- a/app/repositories/users.py
++++ b/app/repositories/users.py
+@@ -34,8 +34,8 @@
+         return User(cur.lastrowid, name, email)
+ 
+     def list_page(self, page: int, size: int = 20) -> list[User]:
+-        """Return one page of users. Pages start at 1."""
+-        offset = (page - 1) * size
++        """Return one page of users. Pages start at 0."""
++        offset = page * size
+         rows = self.conn.execute(
+             "SELECT id, name, email FROM users ORDER BY id LIMIT ? OFFSET ?",
+             (size, offset),

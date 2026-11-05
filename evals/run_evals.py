@@ -7,8 +7,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from app.graph.build import build_graph
+import app.tools.retrieval as retrieval
 
-SETS = {"easy": ROOT / "evals" / "cases", "hard": ROOT / "evals" / "cases_hard"}
+SETS = {"easy": ROOT / "evals" / "cases", "hard": ROOT / "evals" / "cases_hard",
+        "context": ROOT / "evals" / "cases_context"}
 RESULTS = ROOT / "evals" / "results"
 
 # Models often get line numbers slightly wrong, so a finding counts as "at the bug"
@@ -56,7 +58,11 @@ if __name__ == "__main__":
     parser.add_argument("--set", choices=SETS, default="hard", help="which eval set to run")
     parser.add_argument("--split", choices=["tune", "holdout", "all"], default="tune",
                         help="tune while iterating; run holdout only to confirm a final version")
+    parser.add_argument("--retrieval", choices=["off", "keyword", "hybrid", "rerank"], default=None,
+                        help="override RETRIEVAL_MODE from .env for this run")
     args = parser.parse_args()
+    if args.retrieval:
+        retrieval.MODE = args.retrieval   # build_context reads this at call time
 
     cases_dir = SETS[args.set]
     labels = json.loads((cases_dir / "labels.json").read_text(encoding="utf-8"))
@@ -70,7 +76,9 @@ if __name__ == "__main__":
     tokens = seconds = 0
     rows = []
 
-    print(f"Running {len(labels)} cases from '{args.set}' ({args.split} split)\n")
+    print(f"Running {len(labels)} cases from '{args.set}' ({args.split} split), retrieval: {retrieval.MODE}\n")
+    context_chars = 0
+    caller_found = caller_cases = 0   # context set: did retrieval surface the broken caller?
 
     for name, label in labels.items():
         diff = (cases_dir / name).read_text(encoding="utf-8")
@@ -78,7 +86,10 @@ if __name__ == "__main__":
 
         start = time.perf_counter()
         try:
-            result = graph.invoke({"pr_id": name, "diff": diff, "findings": [], "tokens_used": 0})
+            # Each case can ship a snapshot of the repo after the PR, for retrieval to search.
+            repo_root = str(cases_dir / label["repo"]) if label.get("repo") else None
+            result = graph.invoke({"pr_id": name, "diff": diff, "repo_root": repo_root,
+                                   "findings": [], "tokens_used": 0})
         except Exception as e:
             # One failing case shouldn't kill the whole run; record it and move on.
             print(f"{name:36} ERROR {e}", file=sys.stderr)
@@ -94,7 +105,14 @@ if __name__ == "__main__":
         tokens += result["tokens_used"]
         seconds += elapsed
 
-        row = {"case": name, "plan": result["plan"], "seconds": round(elapsed, 1), "tokens": result["tokens_used"]}
+        row = {"case": name, "plan": result["plan"], "seconds": round(elapsed, 1), "tokens": result["tokens_used"],
+               "context_ids": result.get("context_ids") or []}
+        context_chars += len(result.get("context") or "")
+        # Retrieval quality on its own, separate from what the reviewers did with it.
+        for b in bugs:
+            if b.get("affected"):
+                caller_cases += 1
+                caller_found += b["affected"] in row["context_ids"]
         for stage, findings in (("raw", result["findings"]), ("final", result["final_findings"])):
             t = totals[stage]
             t["bugs"] += len(bugs)
@@ -154,6 +172,10 @@ if __name__ == "__main__":
     ok = [r for r in rows if "error" not in r]
     metrics["final_recall_strict_by_category_%"] = {c: pct(hit, n) for c, (hit, n) in sorted(by_category.items())}
     metrics["clean_pass_rate_%"] = pct(clean_passed, clean_cases)
+    metrics["retrieval"] = retrieval.MODE
+    metrics["avg_context_chars"] = round(context_chars / len(ok)) if ok else None
+    if caller_cases:
+        metrics["retrieval_found_broken_caller_%"] = pct(caller_found, caller_cases)
     metrics["total_tokens"] = tokens
     metrics["avg_tokens_per_pr"] = round(tokens / len(ok)) if ok else None
     metrics["avg_seconds_per_pr"] = round(seconds / len(ok), 1) if ok else None
@@ -163,7 +185,7 @@ if __name__ == "__main__":
 
     # Save every run so you can compare prompt versions over time.
     RESULTS.mkdir(exist_ok=True)
-    out = RESULTS / f"{datetime.now():%Y%m%d_%H%M%S}_{args.set}_{args.split}.json"
-    out.write_text(json.dumps({"note": args.note, "set": args.set, "split": args.split,
+    out = RESULTS / f"{datetime.now():%Y%m%d_%H%M%S}_{args.set}_{args.split}_{retrieval.MODE}.json"
+    out.write_text(json.dumps({"note": args.note, "set": args.set, "split": args.split, "retrieval": retrieval.MODE,
                                "metrics": metrics, "cases": rows}, indent=2), encoding="utf-8")
     print(f"\nSaved {out.relative_to(ROOT)}")

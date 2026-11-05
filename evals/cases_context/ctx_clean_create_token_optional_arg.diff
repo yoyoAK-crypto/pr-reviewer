@@ -1,0 +1,15 @@
+--- a/app/api/auth.py
++++ b/app/api/auth.py
+@@ -23,9 +23,10 @@
+     return hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 200_000)
+ 
+ 
+-def create_token(user_id: int) -> str:
++def create_token(user_id: int, scopes: list[str] | None = None) -> str:
+     expires = datetime.now(timezone.utc) + TOKEN_TTL
+-    return jwt.encode({"sub": str(user_id), "exp": expires}, SECRET_KEY, algorithm=ALGORITHM)
++    claims = {"sub": str(user_id), "exp": expires, "scopes": scopes or []}
++    return jwt.encode(claims, SECRET_KEY, algorithm=ALGORITHM)
+ 
+ 
+ def current_user_id(token: str = Depends(oauth2)) -> int:

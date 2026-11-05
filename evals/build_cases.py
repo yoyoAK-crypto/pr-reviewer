@@ -51,6 +51,18 @@ def build_diff(files):
     return "\n".join(parts) + "\n", marked
 
 
+def write_repo(dest: Path, base_files: dict[str, str], case_files) -> None:
+    """Writes the repo as it looks AFTER the PR: every base file, with the PR's files
+    replaced by their new versions (bug markers stripped). Retrieval searches this folder."""
+    files = dict(base_files)
+    for path, _before, after in case_files:
+        files[path] = after
+    for path, text in files.items():
+        out = dest / path
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text("\n".join(MARK.sub("", line) for line in text.splitlines()) + "\n", encoding="utf-8")
+
+
 # ---------- base files ----------
 
 USERS = '''import sqlite3
@@ -391,6 +403,10 @@ def weather(city: str) -> dict:
 
 P_USERS, P_FILES, P_BILLING = "app/repositories/users.py", "app/services/files.py", "app/services/billing.py"
 P_AUTH, P_JOBS, P_CONFIG, P_MAIN = "app/api/auth.py", "app/workers/jobs.py", "app/utils/config_loader.py", "app/api/main.py"
+
+# The whole sample repo, used to write a snapshot per case for retrieval.
+BASE_FILES = {P_USERS: USERS, P_FILES: FILES, P_BILLING: BILLING, P_AUTH: AUTH,
+              P_JOBS: JOBS, P_CONFIG: CONFIG, P_MAIN: MAIN}
 
 # Harmless noise edits reused across cases, so bugs sit inside larger, realistic changes.
 N_USERS_COUNT = ('    def count(self) -> int:\n',
@@ -833,13 +849,16 @@ if __name__ == "__main__":
         filename = f"{name}.diff"
         (OUT / filename).write_text(diff, encoding="utf-8")
 
+        repo = f"repos/{name}"
+        write_repo(OUT / repo, BASE_FILES, case["files"])
+
         if case["bug"] is None:
             assert not marked, f"{name}: clean case has a bug marker"
-            labels[filename] = {"split": case["split"], "bugs": []}
+            labels[filename] = {"split": case["split"], "repo": repo, "bugs": []}
         else:
             assert len(marked) == 1, f"{name}: bug case needs markers in exactly one file"
             (path, lines), = marked.items()
-            labels[filename] = {"split": case["split"], "bugs": [
+            labels[filename] = {"split": case["split"], "repo": repo, "bugs": [
                 {"file": path, "lines": [min(lines), max(lines)], **case["bug"]}]}
 
     (OUT / "labels.json").write_text(json.dumps(labels, indent=2), encoding="utf-8")

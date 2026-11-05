@@ -1,0 +1,11 @@
+--- a/app/services/billing.py
++++ b/app/services/billing.py
+@@ -37,6 +37,8 @@
+ def installments(invoice: Invoice, months: int) -> list[float]:
+     if months <= 0:
+         raise ValueError("months must be positive")
++    if months > 36:
++        raise ValueError("installment plans are limited to 36 months")
+     amount = total(invoice)
+     per_month = round(amount / months, 2)
+     payments = [per_month] * months

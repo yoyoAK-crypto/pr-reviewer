@@ -1,0 +1,223 @@
+{
+  "ctx_get_by_id_returns_dict.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_get_by_id_returns_dict",
+    "bugs": [
+      {
+        "file": "app/repositories/users.py",
+        "lines": [
+          20,
+          20
+        ],
+        "type": "return_type_change",
+        "category": "cross_file",
+        "severity": "high",
+        "keywords": [
+          "invoice_summary",
+          ".email",
+          "attribute",
+          "caller",
+          "orders"
+        ],
+        "affected": "app/api/orders.py::invoice_summary"
+      }
+    ]
+  },
+  "ctx_total_returns_string.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_total_returns_string",
+    "bugs": [
+      {
+        "file": "app/services/billing.py",
+        "lines": [
+          34,
+          34
+        ],
+        "type": "return_type_change",
+        "category": "cross_file",
+        "severity": "high",
+        "keywords": [
+          "receipt_text",
+          "installments",
+          "caller",
+          "format",
+          "orders"
+        ],
+        "affected": "app/api/orders.py::receipt_text"
+      }
+    ]
+  },
+  "ctx_installments_returns_dict.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_installments_returns_dict",
+    "bugs": [
+      {
+        "file": "app/services/billing.py",
+        "lines": [
+          44,
+          44
+        ],
+        "type": "return_type_change",
+        "category": "cross_file",
+        "severity": "high",
+        "keywords": [
+          "monthly_plan",
+          "payments[0]",
+          "keyerror",
+          "caller",
+          "index"
+        ],
+        "affected": "app/api/orders.py::monthly_plan"
+      }
+    ]
+  },
+  "ctx_read_file_returns_str.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_read_file_returns_str",
+    "bugs": [
+      {
+        "file": "app/services/files.py",
+        "lines": [
+          32,
+          32
+        ],
+        "type": "return_type_change",
+        "category": "cross_file",
+        "severity": "high",
+        "keywords": [
+          "attachment_text",
+          "decode",
+          "caller",
+          "bytes"
+        ],
+        "affected": "app/api/orders.py::attachment_text"
+      }
+    ]
+  },
+  "ctx_list_page_zero_based.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_list_page_zero_based",
+    "bugs": [
+      {
+        "file": "app/repositories/users.py",
+        "lines": [
+          38,
+          38
+        ],
+        "type": "contract_change",
+        "category": "cross_file",
+        "severity": "medium",
+        "keywords": [
+          "first_users",
+          "list_page(1)",
+          "caller",
+          "skip",
+          "first page"
+        ],
+        "affected": "app/api/orders.py::first_users"
+      }
+    ]
+  },
+  "ctx_config_get_no_default.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_config_get_no_default",
+    "bugs": [
+      {
+        "file": "app/utils/config_loader.py",
+        "lines": [
+          30,
+          30
+        ],
+        "type": "signature_change",
+        "category": "cross_file",
+        "severity": "high",
+        "keywords": [
+          "request_timeout",
+          "default",
+          "caller",
+          "argument",
+          "typeerror"
+        ],
+        "affected": "app/api/orders.py::request_timeout"
+      }
+    ]
+  },
+  "ctx_record_renamed.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_record_renamed",
+    "bugs": [
+      {
+        "file": "app/workers/jobs.py",
+        "lines": [
+          20,
+          20
+        ],
+        "type": "rename_breaks_caller",
+        "category": "cross_file",
+        "severity": "high",
+        "keywords": [
+          "mark_external_result",
+          "scheduler",
+          "caller",
+          "record(",
+          "attributeerror"
+        ],
+        "affected": "app/workers/scheduler.py::mark_external_result"
+      }
+    ]
+  },
+  "ctx_create_token_required_arg.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_create_token_required_arg",
+    "bugs": [
+      {
+        "file": "app/api/auth.py",
+        "lines": [
+          26,
+          26
+        ],
+        "type": "signature_change",
+        "category": "cross_file",
+        "severity": "high",
+        "keywords": [
+          "service_token",
+          "scheduler",
+          "scopes",
+          "caller",
+          "argument"
+        ],
+        "affected": "app/workers/scheduler.py::service_token"
+      }
+    ]
+  },
+  "ctx_clean_get_by_id_docstring.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_clean_get_by_id_docstring",
+    "bugs": []
+  },
+  "ctx_clean_total_helper.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_clean_total_helper",
+    "bugs": []
+  },
+  "ctx_clean_installments_cap.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_clean_installments_cap",
+    "bugs": []
+  },
+  "ctx_clean_config_get_cast.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_clean_config_get_cast",
+    "bugs": []
+  },
+  "ctx_clean_record_alias.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_clean_record_alias",
+    "bugs": []
+  },
+  "ctx_clean_create_token_optional_arg.diff": {
+    "split": "tune",
+    "repo": "repos/ctx_clean_create_token_optional_arg",
+    "bugs": []
+  }
+}

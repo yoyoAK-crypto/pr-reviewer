@@ -1,0 +1,12 @@
+--- a/app/utils/config_loader.py
++++ b/app/utils/config_loader.py
+@@ -27,5 +27,7 @@
+     return _apply_env_overrides(config)
+ 
+ 
+-def get(key: str, default=None):
+-    return load_config().get(key, default)
++def get(key: str, default=None, cast=None):
++    """Read one config value; optionally convert it, e.g. cast=int."""
++    value = load_config().get(key, default)
++    return cast(value) if cast is not None and value is not None else value

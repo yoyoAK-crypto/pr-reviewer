@@ -1,0 +1,10 @@
+--- a/app/repositories/users.py
++++ b/app/repositories/users.py
+@@ -14,6 +14,7 @@
+         self.conn = conn
+ 
+     def get_by_id(self, user_id: int) -> User | None:
++        """Fetch one user by primary key; None if no such user."""
+         row = self.conn.execute(
+             "SELECT id, name, email FROM users WHERE id = ?", (user_id,)
+         ).fetchone()

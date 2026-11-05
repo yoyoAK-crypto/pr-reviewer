@@ -1,0 +1,19 @@
+--- a/app/services/billing.py
++++ b/app/services/billing.py
+@@ -34,14 +34,14 @@
+     return round(amount * (1 + TAX_RATE), 2)
+ 
+ 
+-def installments(invoice: Invoice, months: int) -> list[float]:
++def installments(invoice: Invoice, months: int) -> dict[int, float]:
+     if months <= 0:
+         raise ValueError("months must be positive")
+     amount = total(invoice)
+     per_month = round(amount / months, 2)
+     payments = [per_month] * months
+     payments[-1] = round(amount - per_month * (months - 1), 2)
+-    return payments
++    return {month: p for month, p in enumerate(payments, start=1)}
+ 
+ 
+ def add_items(invoice: Invoice, items: list[LineItem]) -> Invoice:

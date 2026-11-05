@@ -1,0 +1,14 @@
+--- a/app/workers/jobs.py
++++ b/app/workers/jobs.py
+@@ -25,6 +25,11 @@
+                 self.failed += 1
+ 
+ 
++    def record_many(self, results: list[bool]) -> None:
++        for ok in results:
++            self.record(ok)
++
++
+ async def fetch_status(client: httpx.AsyncClient, job_id: str) -> str:
+     resp = await client.get(STATUS_URL.format(job_id=job_id), timeout=10)
+     resp.raise_for_status()

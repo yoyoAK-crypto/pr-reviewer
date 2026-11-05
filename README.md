@@ -134,3 +134,16 @@ What mattered:
 Note: the holdout split was viewed once (v3) before the final fixes; those fixes were general (line numbering, severity rules), not case-specific.
 
 These numbers are from v5. Later prompt and output-schema changes have not been re-evaluated yet.
+
+## Does retrieval help? (cross-file eval, 8 bugs + 6 clean)
+
+| Retrieval | Recall | Named the broken caller | Caller retrieved | Clean pass | Tokens/PR |
+|---|---|---|---|---|---|
+| off | 87.5% | 0% | n/a | 50% | 3.5k |
+| keyword (BM25) | 100% | 50% | 87.5% | 50% | 5.0k |
+| hybrid (BM25 + embeddings, RRF) | 87.5% | 50% | 87.5% | 33% | 5.0k |
+
+- Plain recall was misleading: without context, reviewers still flagged 87.5% of breaking changes by guessing ("callers may break"). Scoring whether they named the actual broken caller exposed the difference: 0% without retrieval, 50% with it.
+- Keyword search matched hybrid at no extra cost: diffs are full of exact identifiers, BM25's strength. Keyword is the default.
+- Retrieval delivered the evidence in 7/8 cases but reviewers used it in 4/8: the remaining gap is prompting, not search.
+- False alarms on clean PRs came from the tests reviewer ("no test covers this"), unchanged by retrieval.

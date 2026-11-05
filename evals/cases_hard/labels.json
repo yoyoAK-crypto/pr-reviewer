@@ -1,6 +1,7 @@
 {
   "bug_sqli_search.diff": {
     "split": "tune",
+    "repo": "repos/bug_sqli_search",
     "bugs": [
       {
         "file": "app/repositories/users.py",
@@ -21,6 +22,7 @@
   },
   "bug_path_traversal.diff": {
     "split": "tune",
+    "repo": "repos/bug_path_traversal",
     "bugs": [
       {
         "file": "app/services/files.py",
@@ -43,6 +45,7 @@
   },
   "bug_shell_archive.diff": {
     "split": "holdout",
+    "repo": "repos/bug_shell_archive",
     "bugs": [
       {
         "file": "app/services/files.py",
@@ -62,6 +65,7 @@
   },
   "bug_jwt_no_verify.diff": {
     "split": "tune",
+    "repo": "repos/bug_jwt_no_verify",
     "bugs": [
       {
         "file": "app/api/auth.py",
@@ -81,6 +85,7 @@
   },
   "bug_timing_compare.diff": {
     "split": "tune",
+    "repo": "repos/bug_timing_compare",
     "bugs": [
       {
         "file": "app/api/auth.py",
@@ -101,6 +106,7 @@
   },
   "bug_log_password.diff": {
     "split": "holdout",
+    "repo": "repos/bug_log_password",
     "bugs": [
       {
         "file": "app/api/auth.py",
@@ -122,6 +128,7 @@
   },
   "bug_yaml_load.diff": {
     "split": "tune",
+    "repo": "repos/bug_yaml_load",
     "bugs": [
       {
         "file": "app/utils/config_loader.py",
@@ -144,6 +151,7 @@
   },
   "bug_eval_coerce.diff": {
     "split": "tune",
+    "repo": "repos/bug_eval_coerce",
     "bugs": [
       {
         "file": "app/utils/config_loader.py",
@@ -165,6 +173,7 @@
   },
   "bug_cors_wildcard.diff": {
     "split": "holdout",
+    "repo": "repos/bug_cors_wildcard",
     "bugs": [
       {
         "file": "app/api/main.py",
@@ -186,6 +195,7 @@
   },
   "bug_tls_verify_off.diff": {
     "split": "tune",
+    "repo": "repos/bug_tls_verify_off",
     "bugs": [
       {
         "file": "app/api/main.py",
@@ -207,6 +217,7 @@
   },
   "bug_page_offset.diff": {
     "split": "tune",
+    "repo": "repos/bug_page_offset",
     "bugs": [
       {
         "file": "app/repositories/users.py",
@@ -229,6 +240,7 @@
   },
   "bug_soft_delete_column.diff": {
     "split": "holdout",
+    "repo": "repos/bug_soft_delete_column",
     "bugs": [
       {
         "file": "app/repositories/users.py",
@@ -250,6 +262,7 @@
   },
   "bug_append_mode.diff": {
     "split": "tune",
+    "repo": "repos/bug_append_mode",
     "bugs": [
       {
         "file": "app/services/files.py",
@@ -270,6 +283,7 @@
   },
   "bug_mutable_default.diff": {
     "split": "tune",
+    "repo": "repos/bug_mutable_default",
     "bugs": [
       {
         "file": "app/services/billing.py",
@@ -290,6 +304,7 @@
   },
   "bug_discount_boundary.diff": {
     "split": "tune",
+    "repo": "repos/bug_discount_boundary",
     "bugs": [
       {
         "file": "app/services/billing.py",
@@ -312,6 +327,7 @@
   },
   "bug_round_precision.diff": {
     "split": "holdout",
+    "repo": "repos/bug_round_precision",
     "bugs": [
       {
         "file": "app/services/billing.py",
@@ -333,6 +349,7 @@
   },
   "bug_floor_division.diff": {
     "split": "tune",
+    "repo": "repos/bug_floor_division",
     "bugs": [
       {
         "file": "app/services/billing.py",
@@ -355,6 +372,7 @@
   },
   "bug_swallowed_error.diff": {
     "split": "tune",
+    "repo": "repos/bug_swallowed_error",
     "bugs": [
       {
         "file": "app/workers/jobs.py",
@@ -377,6 +395,7 @@
   },
   "bug_missing_await.diff": {
     "split": "tune",
+    "repo": "repos/bug_missing_await",
     "bugs": [
       {
         "file": "app/workers/jobs.py",
@@ -396,6 +415,7 @@
   },
   "bug_counter_race.diff": {
     "split": "holdout",
+    "repo": "repos/bug_counter_race",
     "bugs": [
       {
         "file": "app/workers/jobs.py",
@@ -417,6 +437,7 @@
   },
   "bug_inverted_override.diff": {
     "split": "tune",
+    "repo": "repos/bug_inverted_override",
     "bugs": [
       {
         "file": "app/utils/config_loader.py",
@@ -439,42 +460,52 @@
   },
   "clean_get_many_in_clause.diff": {
     "split": "tune",
+    "repo": "repos/clean_get_many_in_clause",
     "bugs": []
   },
   "clean_archive_exclude.diff": {
     "split": "tune",
+    "repo": "repos/clean_archive_exclude",
     "bugs": []
   },
   "clean_literal_eval_coerce.diff": {
     "split": "tune",
+    "repo": "repos/clean_literal_eval_coerce",
     "bugs": []
   },
   "clean_verify_password_helper.diff": {
     "split": "tune",
+    "repo": "repos/clean_verify_password_helper",
     "bugs": []
   },
   "clean_extract_apply_tax.diff": {
     "split": "tune",
+    "repo": "repos/clean_extract_apply_tax",
     "bugs": []
   },
   "clean_request_timing_log.diff": {
     "split": "holdout",
+    "repo": "repos/clean_request_timing_log",
     "bugs": []
   },
   "clean_stats_snapshot.diff": {
     "split": "tune",
+    "repo": "repos/clean_stats_snapshot",
     "bugs": []
   },
   "clean_users_docstrings.diff": {
     "split": "holdout",
+    "repo": "repos/clean_users_docstrings",
     "bugs": []
   },
   "clean_safe_path_relative_to.diff": {
     "split": "tune",
+    "repo": "repos/clean_safe_path_relative_to",
     "bugs": []
   },
   "clean_installments_cap.diff": {
     "split": "holdout",
+    "repo": "repos/clean_installments_cap",
     "bugs": []
   }
 }

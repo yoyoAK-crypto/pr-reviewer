@@ -1,0 +1,21 @@
+--- a/app/api/auth.py
++++ b/app/api/auth.py
+@@ -23,9 +23,10 @@
+     return hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 200_000)
+ 
+ 
+-def create_token(user_id: int) -> str:
++def create_token(user_id: int, scopes: list[str]) -> str:
+     expires = datetime.now(timezone.utc) + TOKEN_TTL
+-    return jwt.encode({"sub": str(user_id), "exp": expires}, SECRET_KEY, algorithm=ALGORITHM)
++    claims = {"sub": str(user_id), "exp": expires, "scopes": scopes}
++    return jwt.encode(claims, SECRET_KEY, algorithm=ALGORITHM)
+ 
+ 
+ def current_user_id(token: str = Depends(oauth2)) -> int:
+@@ -46,4 +47,4 @@
+         logger.warning("failed login for user=%s", username)
+         raise HTTPException(status_code=401, detail="invalid credentials")
+     logger.info("login ok user=%s", username)
+-    return {"access_token": create_token(account.id), "token_type": "bearer"}
++    return {"access_token": create_token(account.id, ["user"]), "token_type": "bearer"}
