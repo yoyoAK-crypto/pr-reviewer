@@ -1,0 +1,10 @@
+--- a/app/workers/jobs.py
++++ b/app/workers/jobs.py
+@@ -8,6 +8,7 @@
+ logger = logging.getLogger(__name__)
+ 
+ STATUS_URL = "https://jobs.internal/api/status/{job_id}"
++# Reviewers asked for fewer retries in the last PR; 3 keeps nightly runs under 10 minutes.
+ MAX_ATTEMPTS = 3
+ 
+ 

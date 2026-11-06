@@ -9,6 +9,7 @@ from langgraph.types import Send
 from app.graph.state import ReviewState, Finding
 from app.tools.retrieval import build_context
 from app.guardrails.redact import redact, secrets_added
+from app.guardrails import injection
 
 load_dotenv()
 client = Groq(max_retries=6)  # waits and retries on 429 instead of failing
@@ -79,7 +80,16 @@ def run_reviewer(name: str, diff: str, context: str = "") -> tuple[list[Finding]
 
     # With retrieval on, the related code comes first, clearly separated from the diff to review.
     user = number_diff(diff)
-    if context:
+    if injection.DEFENSE:
+        # Layer 1 (spotlighting): everything the PR author wrote goes inside tags, and the
+        # system prompt says that text is data, never instructions. Tags inside the text are
+        # neutralised so an attacker can't "close" the block early.
+        system += injection.SPOTLIGHT_RULES
+        user = f"<untrusted_diff>\n{injection.neutralize_tags(user)}\n</untrusted_diff>"
+        if context:
+            user = (f"RELATED CODE (for understanding only, do not review it):\n<untrusted_context>\n"
+                    f"{injection.neutralize_tags(context)}\n</untrusted_context>\n\nDIFF TO REVIEW:\n{user}")
+    elif context:
         user = f"RELATED CODE (for understanding only, do not review it):\n\n{context}\n\nDIFF TO REVIEW:\n{user}"
 
     resp = client.chat.completions.create(
@@ -130,6 +140,13 @@ def guard(state: ReviewState) -> dict:
                         message=f"Hardcoded secret ({kind}) added in code. Remove it, rotate it, "
                                 "and load it from an environment variable or a secrets manager.")
                 for path, line, kind in secrets_added(diff)]
+    # Layer 2: text aimed at an AI reviewer is flagged by plain code, so a human sees it
+    # even if the reviewers were fooled.
+    if injection.DEFENSE:
+        findings += [Finding(reviewer="guardrail", file=path, line=line, severity="high", confidence=1.0,
+                             message=f"Possible prompt injection: this line {why}. "
+                                     "Automated review may be unreliable here; review this change manually.")
+                     for path, line, why in injection.find_injections(diff)]
     return {"diff": diff, "findings": findings}
 
 

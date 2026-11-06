@@ -1,0 +1,325 @@
+{
+  "note": "guardrail",
+  "set": "easy",
+  "split": "tune",
+  "retrieval": "off",
+  "metrics": {
+    "raw": {
+      "recall_strict_%": 100.0,
+      "recall_loose_%": 100.0,
+      "precision_strict_%": 100.0,
+      "precision_loose_%": 100.0,
+      "findings_per_clean_case": 0.0
+    },
+    "final": {
+      "recall_strict_%": 100.0,
+      "recall_loose_%": 100.0,
+      "precision_strict_%": 100.0,
+      "precision_loose_%": 100.0,
+      "findings_per_clean_case": 0.0
+    },
+    "final_recall_strict_by_category_%": {
+      "uncategorized": 100.0
+    },
+    "clean_pass_rate_%": 100.0,
+    "retrieval": "off",
+    "avg_context_chars": 0,
+    "total_tokens": 28644,
+    "avg_tokens_per_pr": 2864,
+    "avg_seconds_per_pr": 3.7,
+    "errors": 0
+  },
+  "cases": [
+    {
+      "case": "bug_01_sqli.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 6.8,
+      "tokens": 3080,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/auth.py",
+          "line": 10,
+          "severity": "high",
+          "message": "SQL injection vulnerability: user-supplied 'username' is interpolated directly into SQL query string without parameterization, allowing injection attacks.",
+          "confidence": 1.0,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/auth.py",
+          "line": 10,
+          "severity": "high",
+          "message": "SQL injection vulnerability: user-supplied 'username' is interpolated directly into SQL query string without parameterization, allowing injection attacks.",
+          "confidence": 1.0,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_02_secret.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.3,
+      "tokens": 3050,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "guardrail",
+          "file": "app/payments.py",
+          "line": 4,
+          "severity": "high",
+          "message": "Hardcoded secret (credential) added in code. Remove it, rotate it, and load it from an environment variable or a secrets manager.",
+          "confidence": 1.0,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "security",
+          "file": "app/payments.py",
+          "line": 4,
+          "severity": "high",
+          "message": "Hardcoded Stripe secret key in source code; embedding credentials directly is insecure and can lead to credential leakage. Use environment variables or a secret manager instead.",
+          "confidence": 1.0,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/payments.py",
+          "line": 4,
+          "severity": "medium",
+          "message": "Hard\u2011coding a placeholder Stripe API key replaces the original environment\u2011variable lookup, which is likely to cause runtime failures or accidental use of an invalid credential; the code should retrieve the key from configuration or environment rather than a literal string.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/payments.py",
+          "line": 4,
+          "severity": "high",
+          "message": "Hardcoded Stripe API key replaces environment variable, changing authentication behavior and likely causing stripe calls to fail; no tests cover this new behavior.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "guardrail",
+          "file": "app/payments.py",
+          "line": 4,
+          "severity": "high",
+          "message": "Hardcoded secret (credential) added in code. Remove it, rotate it, and load it from an environment variable or a secrets manager.",
+          "confidence": 1.0,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_03_removed_auth.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.6,
+      "tokens": 3271,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/routes/admin.py",
+          "line": 22,
+          "severity": "high",
+          "message": "Removed admin authorization check allows any authenticated user to delete arbitrary users, leading to privilege escalation.",
+          "confidence": 1.0,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/routes/admin.py",
+          "line": 22,
+          "severity": "high",
+          "message": "Removed admin authorization check allows any authenticated user to delete arbitrary users, leading to privilege escalation.",
+          "confidence": 1.0,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_04_cmd_injection.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.1,
+      "tokens": 3569,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/utils/files.py",
+          "line": 5,
+          "severity": "high",
+          "message": "Changed subprocess.run to use shell=True with an f-string containing the path, introducing a command injection risk if the path can be influenced by an attacker. Use a list of arguments or proper escaping instead of shell=True.",
+          "confidence": 0.96,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/utils/files.py",
+          "line": 5,
+          "severity": "medium",
+          "message": "Using shell=True with an f-string command can mis\u2011handle paths containing spaces or special characters; prefer passing a list argument to subprocess.run to avoid quoting issues.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/utils/files.py",
+          "line": 5,
+          "severity": "medium",
+          "message": "Changed subprocess.run to use a shell string (shell=True) instead of a list, altering command execution and quoting behavior. This new behavior is not covered by tests and could cause failures with paths containing spaces or special characters.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "security",
+          "file": "app/utils/files.py",
+          "line": 5,
+          "severity": "high",
+          "message": "Changed subprocess.run to use shell=True with an f-string containing the path, introducing a command injection risk if the path can be influenced by an attacker. Use a list of arguments or proper escaping instead of shell=True.",
+          "confidence": 0.96,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "bug_05_none_check.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 7.1,
+      "tokens": 3579,
+      "context_ids": [],
+      "raw": [
+        {
+          "reviewer": "security",
+          "file": "app/orders.py",
+          "line": 15,
+          "severity": "medium",
+          "message": "Discount percentage from order.coupon.percent is used without validation, allowing potentially negative or overly large discounts that could result in negative order totals or financial manipulation.",
+          "confidence": 0.7,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "style",
+          "file": "app/orders.py",
+          "line": 15,
+          "severity": "medium",
+          "message": "Assumes order.coupon is always present; if coupon is None this will raise an AttributeError. Consider handling missing coupon before accessing .percent.",
+          "confidence": 0.9,
+          "hit": "strict"
+        },
+        {
+          "reviewer": "tests",
+          "file": "app/orders.py",
+          "line": 15,
+          "severity": "high",
+          "message": "Added discount calculation uses order.coupon.percent without checking for a missing coupon, introducing a potential AttributeError or incorrect total that is not covered by tests.",
+          "confidence": 0.8,
+          "hit": "strict"
+        }
+      ],
+      "final": [
+        {
+          "reviewer": "style",
+          "file": "app/orders.py",
+          "line": 15,
+          "severity": "medium",
+          "message": "Assumes order.coupon is always present; if coupon is None this will raise an AttributeError. Consider handling missing coupon before accessing .percent.",
+          "confidence": 0.9,
+          "hit": "strict"
+        }
+      ]
+    },
+    {
+      "case": "clean_01_rename.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.1,
+      "tokens": 2741,
+      "context_ids": [],
+      "raw": [],
+      "final": []
+    },
+    {
+      "case": "clean_02_readme.diff",
+      "plan": [
+        "style"
+      ],
+      "seconds": 7.6,
+      "tokens": 779,
+      "context_ids": [],
+      "raw": [],
+      "final": []
+    },
+    {
+      "case": "clean_03_log_message.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 2.2,
+      "tokens": 2591,
+      "context_ids": [],
+      "raw": [],
+      "final": []
+    },
+    {
+      "case": "clean_04_tested_fix.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 5.8,
+      "tokens": 3063,
+      "context_ids": [],
+      "raw": [],
+      "final": []
+    },
+    {
+      "case": "clean_05_constant.diff",
+      "plan": [
+        "security",
+        "style",
+        "tests"
+      ],
+      "seconds": 1.1,
+      "tokens": 2921,
+      "context_ids": [],
+      "raw": [],
+      "final": []
+    }
+  ]
+}

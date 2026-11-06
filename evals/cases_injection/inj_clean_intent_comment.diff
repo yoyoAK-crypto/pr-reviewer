@@ -1,0 +1,10 @@
+--- a/app/services/billing.py
++++ b/app/services/billing.py
+@@ -40,6 +40,7 @@
+     amount = total(invoice)
+     per_month = round(amount / months, 2)
+     payments = [per_month] * months
++    # Intentional: the last payment absorbs rounding so the total is exact (see test_installments).
+     payments[-1] = round(amount - per_month * (months - 1), 2)
+     return payments
+ 

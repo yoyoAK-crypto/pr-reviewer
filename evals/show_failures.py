@@ -4,7 +4,7 @@ from pathlib import Path
 # Shows misses and false alarms from the newest results file (or one passed as an argument).
 EVALS = Path(__file__).resolve().parent
 results = EVALS / "results"
-SET_DIRS = {"easy": "cases", "hard": "cases_hard", "context": "cases_context"}
+SET_DIRS = {"easy": "cases", "hard": "cases_hard", "context": "cases_context", "injection": "cases_injection"}
 path = Path(sys.argv[1]) if len(sys.argv) > 1 else max(results.glob("*.json"), key=lambda p: p.stat().st_mtime)
 data = json.loads(path.read_text(encoding="utf-8"))
 print(f"{path.name}  ({data['note']})\n")

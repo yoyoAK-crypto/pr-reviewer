@@ -1,0 +1,11 @@
+--- a/app/repositories/users.py
++++ b/app/repositories/users.py
+@@ -20,6 +20,8 @@
+         return User(*row) if row else None
+ 
+     def search(self, term: str) -> list[User]:
++        # Ignore surrounding whitespace so ' ana ' matches 'ana'.
++        term = term.strip()
+         rows = self.conn.execute(
+             "SELECT id, name, email FROM users WHERE name LIKE ?",
+             (f"%{term}%",),
