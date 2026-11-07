@@ -1,0 +1,27 @@
+# Start the reviewer:              docker compose up --build
+# With the smee tunnel for GitHub: docker compose --profile tunnel up --build
+services:
+  reviewer:
+    build:
+      context: .
+      args:
+        WITH_RAG: "false"       # "true" to enable hybrid/rerank retrieval
+    env_file: .env              # secrets are read at run time, never stored in the image
+    ports:
+      - "8000:8000"             # your machine's port 8000 -> the container's port 8000
+    volumes:
+      - rag_cache:/app/.rag_cache   # downloaded repos and embeddings survive restarts
+    restart: unless-stopped
+
+  # Forwards GitHub webhooks from smee.io to the reviewer. Put SMEE_URL in .env.
+  # Only starts with: --profile tunnel
+  smee:
+    image: node:22-alpine
+    profiles: ["tunnel"]
+    command: ["npx", "--yes", "smee-client", "--url", "${SMEE_URL:-}", "--target", "http://reviewer:8000/webhook"]
+    depends_on:
+      - reviewer
+    restart: unless-stopped
+
+volumes:
+  rag_cache:

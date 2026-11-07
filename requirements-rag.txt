@@ -1,0 +1,3 @@
+# Only needed for RETRIEVAL_MODE=hybrid or rerank (embedding and reranker models).
+# Keyword retrieval, the default, works without these.
+fastembed==0.9.1
