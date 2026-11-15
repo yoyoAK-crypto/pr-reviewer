@@ -1,6 +1,6 @@
 # pr-reviewer
 
-An AI code reviewer for GitHub pull requests. Three reviewers (security, style, tests) read a PR's diff in parallel, and a rule-based synthesizer turns their findings into one short review.
+An AI code reviewer for GitHub pull requests. Three reviewers (security, style, tests) read a PR's diff in parallel, with related code from the rest of the repo retrieved as context, and a rule-based synthesizer turns their findings into one short review. Secrets are scrubbed before anything reaches the model, prompt-injection attempts are flagged, and every claim about quality is backed by an eval set.
 
 ## Architecture
 
@@ -23,16 +23,19 @@ flowchart TD
     M --> SVC
 
     subgraph pipeline["Shared pipeline: app/service.py"]
-        SVC["Skip if this commit was<br/>already reviewed"] --> D["Fetch and filter the diff"]
-        D --> P["Planner<br/>docs-only PRs get style only"]
-        P --> R1["Security reviewer"]
-        P --> R2["Style reviewer"]
-        P --> R3["Tests reviewer"]
+        SVC["Skip if this commit was<br/>already reviewed"] --> D["Fetch and filter the diff<br/>redact secrets"]
+        D --> G["Guard<br/>secrets and injection attempts<br/>become findings"]
+        G --> P["Planner<br/>docs-only PRs get style only"]
+        P --> RT["Retrieve<br/>changed functions in full +<br/>related code (BM25)"]
+        RT --> R1["Security reviewer"]
+        RT --> R2["Style reviewer"]
+        RT --> R3["Tests reviewer"]
         R1 --> Y["Synthesizer<br/>filter, dedupe, rank, cap at 7"]
         R2 --> Y
         R3 --> Y
         Y --> B["Build the review"]
     end
+    B --> OBS(["Structured log line + /stats<br/>LangSmith trace"])
 
     B -->|"optional"| POST(["Comments on the PR"])
 ```
@@ -43,7 +46,7 @@ The bot only ever comments. It never approves or blocks a PR.
 
 ## Setup
 
-Requires Python 3.10+.
+Requires Python 3.12+ (Docker and CI use 3.14).
 
 ```powershell
 python -m venv .venv
@@ -104,15 +107,54 @@ Restart the client, then ask it something like "Use pr-reviewer to review owner/
 - `review_diff`: reviews diff text and posts nothing.
 - `review_pull_request`: reviews a PR. It's a dry run unless `post=true`.
 
+### Docker
+
+```powershell
+docker compose up --build                     # the reviewer on http://localhost:8000
+docker compose --profile tunnel up --build    # plus the smee tunnel (set SMEE_URL in .env)
+```
+
+The image runs as a non-root user, never contains `.env` (secrets are passed in at run time), and checks `/health` every 30 seconds. Embedding models are opt-in (`WITH_RAG=true` build arg), since keyword retrieval measured best.
+
+## Deploy
+
+The repo includes a Render Blueprint (`render.yaml`), so the service builds from the Dockerfile in the cloud; no local Docker needed.
+
+1. On [render.com](https://render.com), sign in with GitHub, then **New → Blueprint** and pick this repository.
+2. Render asks for the secrets: `GROQ_API_KEY`, `GITHUB_TOKEN`, `GITHUB_WEBHOOK_SECRET`, `LANGSMITH_API_KEY` and `STATS_TOKEN` (any long random string). Settings like `RETRIEVAL_MODE=keyword` are already in the file.
+3. When the deploy is live, open `https://<your-service>.onrender.com/health`.
+4. In the repo you want reviewed, set the webhook's **Payload URL** to `https://<your-service>.onrender.com/webhook` (same secret, **Pull requests** only). No tunnel needed any more.
+5. Optional: in this repo, add a variable `REVIEWER_URL` (Settings → Secrets and variables → Actions → Variables) to turn on `keep-warm.yml`.
+
+**Free-tier caveat:** Render's free plan sleeps after about 15 idle minutes, and waking takes longer than the 10 seconds GitHub waits for a webhook, so the first PR after a quiet spell can show a failed delivery (use **Redeliver** in the webhook settings). `keep-warm.yml` pings `/health` every 10 minutes to avoid that; a paid plan removes the problem.
+
+Every push to `main` runs CI (`.github/workflows/ci.yml`): the test suite on Python 3.14, then a Docker build that must answer `/health`. Render redeploys automatically after a push.
+
+## Observability
+
+- **One structured log line per review** (`pr-reviewer.metrics`), JSON with the PR, commit, outcome, duration, tokens, findings, secrets redacted, injections flagged and context chunks. It holds counts only, never code or finding text, so logs can't leak what they describe. Search it in Render's log viewer, e.g. `"status": "error"`.
+- **`GET /stats`**: totals since the service started (reviews by outcome, tokens per review, seconds per review, guardrail hits, last 20 reviews). Locked with `Authorization: Bearer <STATS_TOKEN>` when that variable is set. Totals reset on restart; a database table would make them durable.
+- **LangSmith**: each run is named `review owner/repo#N` and tagged with the retrieval mode and repo, PR and commit metadata, so traces can be filtered instead of scrolled.
+
 ## Tests and evals
 
 ```powershell
-python -m pytest                                   # webhook tests: no network, no tokens
+python -m pytest                                   # 51 tests: no network, no tokens
 python evals/run_evals.py "my note"                # hard set, tune split
 python evals/run_evals.py "my note" --split holdout  # run only to confirm a final version
+python evals/run_evals.py "note" --set context --retrieval keyword   # cross-file set
+python evals/run_evals.py "note" --set injection --defense on        # attack set
+python evals/compare.py                            # all runs side by side
 ```
 
-The tests send signed fake GitHub messages to the real webhook code. They check that signatures are enforced, irrelevant events are ignored, and retries don't post twice.
+The tests run the real code with only GitHub and the model replaced by fakes:
+- **Webhook** (`test_webhook.py`): signatures enforced, irrelevant events ignored, retries never post twice, new commits get their own review.
+- **Pipeline** (`test_pipeline.py`): the full LangGraph run; the model never sees a secret; guardrail findings appear even when every reviewer is silent; synthesizer filtering, dedupe and ranking; inline comments vs summary.
+- **Guardrails** (`test_guardrails.py`): every redaction rule and injection pattern, plus lookalikes that must not trigger.
+- **Retrieval** (`test_retrieval.py`): changed functions found by line number, callers found by search, size cap respected.
+- **Observability** (`test_observability.py`): `/stats` counts, error recording, the token lock, and log lines free of code and secrets.
+
+The suite was checked by breaking the code on purpose (no redaction, no signature check, no nitpick filter, and three more): every break made a test fail.
 
 ## Evaluation
 

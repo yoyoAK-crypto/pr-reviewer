@@ -1,0 +1,33 @@
+# Render Blueprint: deploys the reviewer from the Dockerfile in this repo.
+# Render reads this file when you choose New > Blueprint and pick this repository.
+services:
+  - type: web
+    name: pr-reviewer
+    runtime: docker
+    plan: free                 # free tier: sleeps after ~15 min idle (see README, "Deploy")
+    region: frankfurt          # closest Render region to Cairo
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health   # Render only switches traffic to a new deploy once this answers
+    autoDeploy: true           # every push to main redeploys
+    envVars:
+      # Secrets: "sync: false" means Render asks you for the value when you create the service.
+      # They are stored by Render, never in this file or the image.
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_WEBHOOK_SECRET
+        sync: false
+      - key: LANGSMITH_API_KEY
+        sync: false
+      - key: STATS_TOKEN
+        sync: false
+      # Settings chosen by the evals
+      - key: RETRIEVAL_MODE
+        value: keyword
+      - key: INJECTION_DEFENSE
+        value: "on"
+      - key: LANGSMITH_TRACING
+        value: "true"
+      - key: LANGSMITH_PROJECT
+        value: pr-reviewer

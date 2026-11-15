@@ -13,6 +13,7 @@ import fastapi
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Request
 
+from app.observability import snapshot
 from app.service import review_pull_request
 
 load_dotenv()
@@ -20,6 +21,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logger = logging.getLogger("pr-reviewer")
 
 WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET", "")
+
+# Optional password for /stats. When set, requests need the header "Authorization: Bearer <token>".
+# /stats holds counts only, never code, but on a public URL it is still good practice to lock it.
+STATS_TOKEN = os.getenv("STATS_TOKEN", "")
 
 # Only these PR events need a review: new PR, new commits pushed, PR reopened, draft marked ready.
 REVIEW_ACTIONS = {"opened", "synchronize", "reopened", "ready_for_review"}
@@ -52,6 +57,14 @@ def run_review(owner: str, repo: str, number: int, head_sha: str) -> None:
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+# Totals since the service started: reviews by outcome, tokens, timing, guardrail hits, last 20 reviews.
+@app.get("/stats")
+def stats(authorization: str | None = Header(default=None)) -> dict:
+    if STATS_TOKEN and not hmac.compare_digest(authorization or "", f"Bearer {STATS_TOKEN}"):
+        raise HTTPException(status_code=401, detail="missing or wrong token")
+    return snapshot()
 
 
 @app.post("/webhook", status_code=202)

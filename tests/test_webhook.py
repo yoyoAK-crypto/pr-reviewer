@@ -6,8 +6,7 @@ import hmac
 import json
 import os
 
-# nodes.py builds a Groq client on import, which needs a key to exist. It is never used here.
-os.environ.setdefault("GROQ_API_KEY", "test-key")
+# Test environment settings (fake keys, no tracing, no retrieval) live in tests/conftest.py.
 
 import pytest
 from fastapi.testclient import TestClient
@@ -35,7 +34,7 @@ class FakeServices:
         self.reviews = []
         self.graph_calls = 0
 
-    def invoke(self, state):
+    def invoke(self, state, config=None):   # config: LangSmith run name, tags, metadata
         self.graph_calls += 1
         finding = Finding(reviewer="security", file="app/a.py", line=2, severity="high",
                           message="eval on user input", confidence=0.9)

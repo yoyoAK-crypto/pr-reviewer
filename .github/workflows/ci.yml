@@ -1,0 +1,37 @@
+# Runs on every push and pull request: the test suite, then a Docker build.
+# A red X on GitHub means something broke before it reached the deployed service.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      # Tests never call Groq or GitHub (both are faked), but the code expects a key to exist.
+      GROQ_API_KEY: ci-placeholder
+      LANGSMITH_TRACING: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t pr-reviewer:ci .
+      - name: Start it and check /health
+        run: |
+          docker run -d --name reviewer -p 8000:8000 -e GROQ_API_KEY=ci-placeholder -e GITHUB_WEBHOOK_SECRET=ci pr-reviewer:ci
+          for i in $(seq 1 20); do curl -fsS localhost:8000/health && exit 0; sleep 1; done
+          docker logs reviewer; exit 1
